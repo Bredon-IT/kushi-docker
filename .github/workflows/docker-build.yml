@@ -9,11 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repository
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Configure AWS credentials from GitHub Secrets
+      # Configure AWS credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -26,8 +25,8 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Build & Push Docker Image
-      - name: Build, Tag and Push to ECR
+      # Build and push Docker image
+      - name: Build, Tag and Push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
           ECR_REPO: ${{ secrets.ECR_REPOSITORY }}
@@ -37,7 +36,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
           echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" >> $GITHUB_ENV
 
-      # Deploy to AWS App Runner
+      # Deploy to App Runner using service name: kushi-backend
       - name: Deploy to AWS App Runner (kushi-backend)
         run: |
           echo "Fetching AppRunner Service ARN for kushi-backend..."
@@ -52,6 +51,26 @@ jobs:
             echo "ERROR: App Runner service 'kushi-backend' not found!"
             exit 1
           fi
+
+          echo "Waiting for AppRunner service to become READY..."
+
+          # Retry for 20 minutes (40 attempts x 30s)
+          for i in {1..40}; do
+            STATUS=$(aws apprunner describe-service \
+              --service-arn "$SERVICE_ARN" \
+              --query "Service.Status" \
+              --output text)
+
+            echo "Current Status: $STATUS"
+
+            if [ "$STATUS" = "RUNNING" ] || [ "$STATUS" = "PAUSED" ]; then
+              echo "Service is ready for update."
+              break
+            fi
+
+            echo "Service not ready. Retrying in 30 seconds..."
+            sleep 30
+          done
 
           echo "Updating AppRunner service with new image..."
 
