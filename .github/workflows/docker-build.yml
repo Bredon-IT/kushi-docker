@@ -1,32 +1,40 @@
-name: Build and Push Docker Image to GHCR
+name: Build & Deploy to AWS ECR + AppRunner
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout your code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Login to GitHub Container Registry
-      - name: Login to GHCR
-        uses: docker/login-action@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      # Build Docker image
-      - name: Build Docker Image
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/kushi-docker:latest .
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
 
-      # Push Docker image
-      - name: Push Docker Image
+      - name: Build, Tag and Push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          ECR_REPO: ${{ secrets.ECR_REPOSITORY }}
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/kushi-docker:latest
+          IMAGE_TAG=latest
+          docker build -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+          echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Deploy to AWS AppRunner
+        run: |
+          aws apprunner update-service \
+            --service-arn arn:aws:apprunner:${{ secrets.AWS_REGION }}:<YOUR_ACCOUNT_ID>:service/kushi-docker-service \
+            --source-configuration "ImageRepository={ImageIdentifier=${IMAGE_URI},ImageRepositoryType=ECR Public,ImageConfiguration={Port=8443}}"
