@@ -9,9 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout repository
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # Configure AWS credentials from GitHub Secrets
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -19,11 +21,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # Login to ECR
       - name: Login to Amazon ECR
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, Tag and Push image to Amazon ECR
+      # Build & Push Docker Image
+      - name: Build, Tag and Push to ECR
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
           ECR_REPO: ${{ secrets.ECR_REPOSITORY }}
@@ -33,8 +37,26 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
           echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" >> $GITHUB_ENV
 
-      - name: Deploy to AWS AppRunner
+      # Deploy to AWS App Runner
+      - name: Deploy to AWS App Runner (kushi-backend)
         run: |
+          echo "Fetching AppRunner Service ARN for kushi-backend..."
+
+          SERVICE_ARN=$(aws apprunner list-services \
+            --query "ServiceSummaryList[?ServiceName=='kushi-backend'].ServiceArn" \
+            --output text)
+
+          echo "Service ARN: $SERVICE_ARN"
+
+          if [ -z "$SERVICE_ARN" ]; then
+            echo "ERROR: App Runner service 'kushi-backend' not found!"
+            exit 1
+          fi
+
+          echo "Updating AppRunner service with new image..."
+
           aws apprunner update-service \
-            --service-arn arn:aws:apprunner:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:service/kushi-docker-service \
-            --source-configuration ImageRepository={ImageIdentifier=${IMAGE_URI},ImageRepositoryType="ECR",ImageConfiguration={Port=8443}}
+            --service-arn "$SERVICE_ARN" \
+            --source-configuration "ImageRepository={ImageIdentifier=${IMAGE_URI},ImageRepositoryType=ECR,ImageConfiguration={Port=8443}}"
+
+          echo "Deployment update triggered successfully!"
