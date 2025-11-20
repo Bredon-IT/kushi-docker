@@ -29,10 +29,37 @@ public class CustomerDTO {
     private String payment_method;
     private String payment_status;
 
-    // No-arg constructor
+    // ✅ No-arg constructor
     public CustomerDTO() {}
 
-    // Full constructor
+    // ✅ Constructor REQUIRED for JPQL query
+    public CustomerDTO(
+            Long booking_id,
+            Long userId,
+            String customer_name,
+            String customer_email,
+            String customer_number,
+            String address_line_1,
+            String city,
+            Double totalAmount,
+            LocalDateTime bookingDate,
+            String bookingStatus,
+            String booking_time
+    ) {
+        this.booking_id = booking_id;
+        this.userId = userId;
+        this.customer_name = customer_name;
+        this.customer_email = customer_email;
+        this.customer_number = customer_number;
+        this.address_line_1 = address_line_1;
+        this.city = city;
+        this.totalAmount = totalAmount;
+        this.bookingDate = bookingDate;
+        this.bookingStatus = bookingStatus;
+        this.booking_time = booking_time;
+    }
+
+    // ✅ Full Constructor (kept as-is)
     public CustomerDTO(
             Long booking_id,
             Integer customer_id,
@@ -73,149 +100,59 @@ public class CustomerDTO {
         this.payment_status = payment_status;
     }
 
-    // Getters and Setters
+    // ========== Getters & Setters ==========
 
-    public Long getBooking_id() {
-        return booking_id;
-    }
+    public Long getBooking_id() { return booking_id; }
+    public void setBooking_id(Long booking_id) { this.booking_id = booking_id; }
 
-    public void setBooking_id(Long booking_id) {
-        this.booking_id = booking_id;
-    }
+    public Integer getCustomer_id() { return customer_id; }
+    public void setCustomer_id(Integer customer_id) { this.customer_id = customer_id; }
 
-    public Integer getCustomer_id() {
-        return customer_id;
-    }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
-    public void setCustomer_id(Integer customer_id) {
-        this.customer_id = customer_id;
-    }
+    public String getCustomer_name() { return customer_name; }
+    public void setCustomer_name(String customer_name) { this.customer_name = customer_name; }
 
-    public Long getUserId() {
-        return userId;
-    }
+    public String getCustomer_email() { return customer_email; }
+    public void setCustomer_email(String customer_email) { this.customer_email = customer_email; }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    public String getCustomer_number() { return customer_number; }
+    public void setCustomer_number(String customer_number) { this.customer_number = customer_number; }
 
-    public String getCustomer_name() {
-        return customer_name;
-    }
+    public String getAddress_line_1() { return address_line_1; }
+    public void setAddress_line_1(String address_line_1) { this.address_line_1 = address_line_1; }
 
-    public void setCustomer_name(String customer_name) {
-        this.customer_name = customer_name;
-    }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 
-    public String getCustomer_email() {
-        return customer_email;
-    }
+    public Double getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
 
-    public void setCustomer_email(String customer_email) {
-        this.customer_email = customer_email;
-    }
+    public LocalDateTime getBookingDate() { return bookingDate; }
+    public void setBookingDate(LocalDateTime bookingDate) { this.bookingDate = bookingDate; }
 
-    public String getCustomer_number() {
-        return customer_number;
-    }
+    public String getBookingStatus() { return bookingStatus; }
+    public void setBookingStatus(String bookingStatus) { this.bookingStatus = bookingStatus; }
 
-    public void setCustomer_number(String customer_number) {
-        this.customer_number = customer_number;
-    }
+    public String getBooking_time() { return booking_time; }
+    public void setBooking_time(String booking_time) { this.booking_time = booking_time; }
 
-    public String getAddress_line_1() {
-        return address_line_1;
-    }
+    public String getBooking_service_name() { return booking_service_name; }
+    public void setBooking_service_name(String booking_service_name) { this.booking_service_name = booking_service_name; }
 
-    public void setAddress_line_1(String address_line_1) {
-        this.address_line_1 = address_line_1;
-    }
+    public Double getBooking_amount() { return booking_amount; }
+    public void setBooking_amount(Double booking_amount) { this.booking_amount = booking_amount; }
 
-    public String getCity() {
-        return city;
-    }
+    public Double getDiscount() { return discount; }
+    public void setDiscount(Double discount) { this.discount = discount; }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+    public Double getGrand_total() { return grand_total; }
+    public void setGrand_total(Double grand_total) { this.grand_total = grand_total; }
 
-    public Double getTotalAmount() {
-        return totalAmount;
-    }
+    public String getPayment_method() { return payment_method; }
+    public void setPayment_method(String payment_method) { this.payment_method = payment_method; }
 
-    public void setTotalAmount(Double totalAmount) {
-        this.totalAmount = totalAmount;
-    }
-
-    public LocalDateTime getBookingDate() {
-        return bookingDate;
-    }
-
-    public void setBookingDate(LocalDateTime bookingDate) {
-        this.bookingDate = bookingDate;
-    }
-
-    public String getBookingStatus() {
-        return bookingStatus;
-    }
-
-    public void setBookingStatus(String bookingStatus) {
-        this.bookingStatus = bookingStatus;
-    }
-
-    public String getBooking_time() {
-        return booking_time;
-    }
-
-    public void setBooking_time(String booking_time) {
-        this.booking_time = booking_time;
-    }
-
-    public String getBooking_service_name() {
-        return booking_service_name;
-    }
-
-    public void setBooking_service_name(String booking_service_name) {
-        this.booking_service_name = booking_service_name;
-    }
-
-    public Double getBooking_amount() {
-        return booking_amount;
-    }
-
-    public void setBooking_amount(Double booking_amount) {
-        this.booking_amount = booking_amount;
-    }
-
-    public Double getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(Double discount) {
-        this.discount = discount;
-    }
-
-    public Double getGrand_total() {
-        return grand_total;
-    }
-
-    public void setGrand_total(Double grand_total) {
-        this.grand_total = grand_total;
-    }
-
-    public String getPayment_method() {
-        return payment_method;
-    }
-
-    public void setPayment_method(String payment_method) {
-        this.payment_method = payment_method;
-    }
-
-    public String getPayment_status() {
-        return payment_status;
-    }
-
-    public void setPayment_status(String payment_status) {
-        this.payment_status = payment_status;
-    }
+    public String getPayment_status() { return payment_status; }
+    public void setPayment_status(String payment_status) { this.payment_status = payment_status; }
 }
