@@ -61,11 +61,13 @@ public class OfferController {
         offerService.deleteBanner(id);
     }
 
-    // ================== IMAGE UPLOAD ==================
+    // ================== IMAGE UPLOAD (Offers & Banners Share Same Logic) ==================
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-            if (file.isEmpty()) return ResponseEntity.badRequest().body("File is empty!");
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body("File is empty!");
+            }
 
             // Save to uploads folder
             String uploadDir = System.getProperty("user.dir") + File.separator + "uploads";
@@ -76,8 +78,9 @@ public class OfferController {
             File destFile = new File(dir, fileName);
             file.transferTo(destFile);
 
-<<<<<<< HEAD
-            String fileUrl = "Global_API_BASE/uploads/" + fileName;
+            // FINAL CORRECT URL (Works for Production)
+            String fileUrl = "/uploads/" + fileName;
+
             return ResponseEntity.ok(fileUrl);
 
         } catch (IOException e) {
@@ -85,12 +88,13 @@ public class OfferController {
             return ResponseEntity.status(500).body("Upload failed: " + e.getMessage());
         }
     }
-    // ================== IMAGE UPLOAD (banners) ==================
+
     @PostMapping("/banners/upload")
     public ResponseEntity<?> uploadBannerImage(@RequestParam("file") MultipartFile file) {
-        // same logic as /upload but separate endpoint for banners
         try {
-            if (file.isEmpty()) return ResponseEntity.badRequest().body("File is empty!");
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body("File is empty!");
+            }
 
             String uploadDir = System.getProperty("user.dir") + File.separator + "uploads";
             File dir = new File(uploadDir);
@@ -100,10 +104,9 @@ public class OfferController {
             File destFile = new File(dir, fileName);
             file.transferTo(destFile);
 
-            String fileUrl = "Global_API_BASE/uploads/" + fileName;
-=======
-            String fileUrl = "https://main.dhtawzq4yzgjo.amplifyapp.com/uploads/" + fileName;
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
+            // FINAL CORRECT URL
+            String fileUrl = "/uploads/" + fileName;
+
             return ResponseEntity.ok(fileUrl);
 
         } catch (IOException e) {
@@ -112,7 +115,3 @@ public class OfferController {
         }
     }
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788

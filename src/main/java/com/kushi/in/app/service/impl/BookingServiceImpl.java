@@ -5,24 +5,16 @@ import com.kushi.in.app.model.BookingDTO;
 import com.kushi.in.app.model.BookingRequest;
 import com.kushi.in.app.entity.Customer;
 import com.kushi.in.app.dao.BookingRepository;
-import com.kushi.in.app.model.OrderDTO;
 import com.kushi.in.app.service.BookingService;
 import com.kushi.in.app.service.NotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-<<<<<<< HEAD
-import java.util.Optional;
-=======
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -42,9 +34,13 @@ public class BookingServiceImpl implements BookingService {
         this.customerRepository = customerRepository;
     }
 
-    @Override
+    // ===============================================================
+    // CREATE BOOKING
+    // ===============================================================
 
+    @Override
     public Customer createBooking(BookingRequest request) {
+
         Customer booking = new Customer();
 
         booking.setCustomer_id(request.getCustomerId());
@@ -65,19 +61,16 @@ public class BookingServiceImpl implements BookingService {
         booking.setCreated_by(request.getCreatedBy() != null ? request.getCreatedBy() : "Customer");
         booking.setCreated_date(LocalDateTime.now().toString());
         booking.setBooking_time(request.getBookingTime());
-        booking.setSite_visit(request.getSite_visit() != null ? request.getSite_visit(): "Pending");
+        booking.setSite_visit(request.getSite_visit() != null ? request.getSite_visit() : "Pending");
         booking.setPayment_method(request.getPayment_method());
-        booking.setPayment_method(request.getPayment_method());
-        // Parse bookingDate
+
         if (request.getBookingDate() != null && !request.getBookingDate().isEmpty()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
             booking.setBookingDate(LocalDateTime.parse(request.getBookingDate()));
         }
 
-        // Save the booking first to get the booking ID
         Customer savedBooking = bookingRepository.save(booking);
 
-        // Send a notification that the booking has been successfully created
+        // send notification
         try {
             notificationService.sendBookingReceived(
                     savedBooking.getCustomer_email(),
@@ -88,20 +81,22 @@ public class BookingServiceImpl implements BookingService {
             );
         } catch (Exception e) {
             e.printStackTrace();
-            // You can also log this error more formally
         }
 
         return savedBooking;
     }
 
+    // ===============================================================
+    // GET ALL BOOKINGS
+    // ===============================================================
 
     @Override
     public List<BookingDTO> getAllBookings() {
         return bookingRepository.findAll().stream().map(c -> {
-            BookingDTO dto = new BookingDTO();
-            dto.setBooking_id(c.getBooking_id());
 
-            // map to booking_id
+            BookingDTO dto = new BookingDTO();
+
+            dto.setBooking_id(c.getBooking_id());
             dto.setCustomer_name(c.getCustomer_name());
             dto.setCustomer_email(c.getCustomer_email());
             dto.setCustomer_number(c.getCustomer_number());
@@ -116,25 +111,28 @@ public class BookingServiceImpl implements BookingService {
             dto.setGrand_total(c.getGrand_total());
             dto.setCancellation_reason(c.getCancellation_reason());
             dto.setPayment_method(c.getPayment_method());
-            dto.setPayment_status(c.getPayment_status());
             dto.setSite_visit(c.getSite_visit());
             dto.setAddress(c.getAddress_line_1());
-            // FIX: Convert comma-separated String to List<String>
+
+            // worker assign (CSV → list)
             dto.setWorker_assign(
                     c.getWorker_assign() != null && !c.getWorker_assign().isEmpty()
                             ? Arrays.asList(c.getWorker_assign().split(","))
                             : Collections.emptyList()
-            );  dto.setCanceledBy(c.getCanceledBy());
+            );
+
+            dto.setCanceledBy(c.getCanceledBy());
             return dto;
         }).toList();
     }
 
+    // ===============================================================
+    // UPDATE BOOKING STATUS (CANCEL / CONFIRM / COMPLETE)
+    // ===============================================================
+
     @Override
-<<<<<<< HEAD
     public Customer updateBookingStatus(Long bookingId, String status, String canceledBy, String cancellationReason) {
-=======
-    public Customer updateBookingStatus(Long bookingId, String status, String canceledBy) {
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
+
         Customer customer = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
@@ -142,11 +140,9 @@ public class BookingServiceImpl implements BookingService {
 
         if ("cancelled".equalsIgnoreCase(status)) {
             customer.setCanceledBy(canceledBy);
-<<<<<<< HEAD
-            customer.setCancellation_reason(cancellationReason); // ← SAVE reason
-=======
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
+            customer.setCancellation_reason(cancellationReason);
         }
+
         bookingRepository.save(customer);
 
         try {
@@ -156,7 +152,8 @@ public class BookingServiceImpl implements BookingService {
                         customer.getCustomer_number(),
                         customer.getCustomer_name(),
                         customer.getBooking_service_name(),
-                        customer.getBookingDate());
+                        customer.getBookingDate()
+                );
 
             } else if ("cancelled".equalsIgnoreCase(status)) {
                 notificationService.sendBookingDecline(
@@ -164,8 +161,8 @@ public class BookingServiceImpl implements BookingService {
                         customer.getCustomer_number(),
                         customer.getCustomer_name(),
                         customer.getBooking_service_name(),
-                        customer.getBookingDate());
-                        customer.getCancellation_reason();
+                        customer.getBookingDate()
+                );
 
             } else if ("completed".equalsIgnoreCase(status)) {
                 notificationService.sendBookingCompleted(
@@ -173,67 +170,53 @@ public class BookingServiceImpl implements BookingService {
                         customer.getCustomer_number(),
                         customer.getCustomer_name(),
                         customer.getBooking_service_name(),
-                        customer.getBookingDate());
-
+                        customer.getBookingDate()
+                );
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return customer;
     }
 
+    // ===============================================================
+    // NOTIFICATION LOG
+    // ===============================================================
 
     @Override
     public void sendBookingNotification(String email, String phoneNumber, String status) {
         System.out.println("Sending notification for status: " + status +
-                " to email: " + email + " and phone: " + phoneNumber);
-        // TODO: Implement real notification logic
+                " to email: " + email + ", phone: " + phoneNumber);
     }
 
+    // ===============================================================
+    // DISCOUNT UPDATE
+    // ===============================================================
 
     @Override
-<<<<<<< HEAD
     public Customer updateBookingDiscount(Long bookingId, double discount) {
+
         Customer booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
         double baseAmount = booking.getBooking_amount() != null ? booking.getBooking_amount() : 0.0;
-        double validDiscount = Math.min(Math.max(discount, 0.0), baseAmount);
+
+        double validDiscount = Math.min(Math.max(discount, 0), baseAmount);
         double grandTotal = baseAmount - validDiscount;
 
         booking.setDiscount(validDiscount);
         booking.setGrand_total(grandTotal);
 
         return bookingRepository.save(booking);
-=======
-    public void updateBookingDiscount(Long bookingId, Double discount) {
-        Customer booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-
-        // Save discount
-        booking.setDiscount(discount);
-
-        // Calculate and save grand total
-        double finalAmount = booking.getBooking_amount() - discount;
-        if (finalAmount < 0) {
-            finalAmount = 0; // Prevent negative totals
-        }
-        booking.setGrand_total(finalAmount);
-
-        bookingRepository.save(booking);
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
     }
 
+    // ===============================================================
+    // GET BOOKING BY ID
+    // ===============================================================
 
-
-
-<<<<<<< HEAD
     @Override
     public Optional<Customer> getBookingDetailsById(Long id) {
-        // Simple call to the JpaRepository method
         return bookingRepository.findById(id);
     }
-=======
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
-
 }

@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class OrderServiceImpl implements OrderService {
 
@@ -24,7 +25,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public List<Customer> getBookingsForUserByEmail(String email) {
-        // Optional: sync existing bookings if needed
         customerRepository.syncUserIdsWithEmails();
         return customerRepository.findBookingsByUserEmail(email);
     }
@@ -32,18 +32,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Customer createBookingForUser(Customer booking, Long userId) {
-        // Fetch logged-in user
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Assign user to booking automatically
         booking.setUser(user);
-        booking.setCustomer_email(user.getEmail()); // ensure email is correct
+        booking.setCustomer_email(user.getEmail());
 
-        // Save booking
-        Customer savedBooking = customerRepository.save(booking);
-
-        return savedBooking;
+        return customerRepository.save(booking);
     }
 
     @Override
@@ -55,14 +50,10 @@ public class OrderServiceImpl implements OrderService {
         booking.setFeedback(request.getFeedback());
         customerRepository.save(booking);
     }
-<<<<<<< HEAD
 
     @Override
     @Transactional
     public List<Customer> getPublishedReviews() {
-        // Calls the new repository method to fetch only completed reviews
         return customerRepository.findAllByRatingIsNotNullAndFeedbackIsNotNull();
     }
-=======
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
 }

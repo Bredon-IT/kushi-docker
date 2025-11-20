@@ -20,16 +20,11 @@ public class OfferService {
     }
 
     public Offer addOffer(Offer offer) {
-<<<<<<< HEAD
         // ensure text not null
         if (offer.getText() == null) offer.setText("");
         return offerRepository.save(offer);
     }
-=======
-        return offerRepository.save(offer);
-    }
 
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
     public Offer updateOffer(Long id, Offer updatedOffer) {
         Optional<Offer> optional = offerRepository.findById(id);
         if (optional.isPresent()) {
@@ -39,11 +34,8 @@ public class OfferService {
             offer.setFontFamily(updatedOffer.getFontFamily());
             offer.setColor(updatedOffer.getColor());
             offer.setEmoji(updatedOffer.getEmoji());
-<<<<<<< HEAD
             offer.setTitle(updatedOffer.getTitle());
             offer.setLink(updatedOffer.getLink());
-=======
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
             return offerRepository.save(offer);
         } else {
             throw new RuntimeException("Offer not found with id " + id);
@@ -55,17 +47,14 @@ public class OfferService {
     }
 
     // ================== BANNERS ==================
-    // Get banners (offers with only imageUrl or a separate isBanner field)
     public List<Offer> getAllBanners() {
-        // Example: banners are offers with non-null imageUrl
         return offerRepository.findAll().stream()
                 .filter(o -> o.getImageUrl() != null && (o.getText() == null || o.getText().isEmpty()))
                 .toList();
     }
 
     public Offer addBanner(Offer banner) {
-        // Ensure text is empty for banners
-        banner.setText("");
+        banner.setText(""); // banners text always empty
         return offerRepository.save(banner);
     }
 
@@ -74,13 +63,9 @@ public class OfferService {
         if (optional.isPresent()) {
             Offer banner = optional.get();
             banner.setImageUrl(updatedBanner.getImageUrl());
-<<<<<<< HEAD
             banner.setTitle(updatedBanner.getTitle());
             banner.setLink(updatedBanner.getLink());
-            // keep text empty
-            banner.setText("");
-=======
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
+            banner.setText(""); // keep text empty for banners
             return offerRepository.save(banner);
         } else {
             throw new RuntimeException("Banner not found with id " + id);

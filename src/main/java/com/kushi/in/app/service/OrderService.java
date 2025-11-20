@@ -10,14 +10,12 @@ public interface OrderService {
     // Fetch bookings for logged-in user
     List<Customer> getBookingsForUserByEmail(String email);
 
-    // Optional: create a booking for a logged-in user
+    // Create a booking for a logged-in user
     Customer createBookingForUser(Customer booking, Long userId);
 
-
+    // Update rating & feedback
     void updateRatingAndFeedback(Long bookingId, RatingRequest request);
-<<<<<<< HEAD
 
+    // Fetch only published reviews (rating and feedback not null)
     List<Customer> getPublishedReviews();
-=======
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
 }

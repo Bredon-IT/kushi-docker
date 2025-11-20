@@ -1,9 +1,10 @@
 package com.kushi.in.app.controller;
 
 import com.kushi.in.app.dao.BookingRepository;
-import com.kushi.in.app.dao.CustomerRepository;
 import com.kushi.in.app.entity.Customer;
-import com.kushi.in.app.model.*;
+import com.kushi.in.app.model.BookingDTO;
+import com.kushi.in.app.model.BookingNotificationRequest;
+import com.kushi.in.app.model.BookingRequest;
 import com.kushi.in.app.service.BookingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/bookings")
-@CrossOrigin(origins = "https://main.dhtawzq4yzgjo.amplifyapp.com") // frontend React dev server
+@CrossOrigin(origins = "https://main.dhtawzq4yzgjo.amplifyapp.com")
 public class BookingController {
 
     private final BookingService bookingService;
@@ -23,7 +24,6 @@ public class BookingController {
     public BookingController(BookingService bookingService, BookingRepository bookingRepository) {
         this.bookingService = bookingService;
         this.bookingRepository = bookingRepository;
-
     }
 
     // ✅ Create Booking
@@ -43,27 +43,26 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getAllBookings());
     }
 
-    // ✅ Update Booking Status
+    // ✅ Update Booking Status (supports cancellation reason)
     @PutMapping("/{id}/status")
     public ResponseEntity<?> updateStatus(@PathVariable Long id,
                                           @RequestBody Map<String, String> body) {
         try {
             String status = body.get("status");
-<<<<<<< HEAD
             String canceledBy = body.get("canceledBy");
-            String cancellationReason = body.get("cancellationReason"); // ← NEW
-            Customer updated = bookingService.updateBookingStatus(id, status, canceledBy, cancellationReason);
-=======
-            String canceledBy = body.get("canceledBy"); // NEW
-            Customer updated = bookingService.updateBookingStatus(id, status, canceledBy);
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
+            String cancellationReason = body.get("cancellationReason");
+
+            Customer updated = bookingService.updateBookingStatus(
+                    id, status, canceledBy, cancellationReason
+            );
+
             return ResponseEntity.ok(updated);
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Failed to update status: " + e.getMessage());
         }
     }
-
 
     // ✅ Send Booking Notification
     @PostMapping("/notify")
@@ -81,6 +80,7 @@ public class BookingController {
         }
     }
 
+    // ✅ Delete Booking
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteBooking(@PathVariable Long id) {
         try {
@@ -91,11 +91,7 @@ public class BookingController {
         }
     }
 
-
-<<<<<<< HEAD
-
     // ✅ Update Booking Discount
-    // BookingController.java
     @PutMapping("/{id}/discount")
     public ResponseEntity<Customer> updateDiscount(
             @PathVariable Long id,
@@ -104,47 +100,13 @@ public class BookingController {
         double discount = payload.getOrDefault("discount", 0.0);
         Customer updatedBooking = bookingService.updateBookingDiscount(id, discount);
         return ResponseEntity.ok(updatedBooking);
-=======
-    // ✅ Update Booking Discount
-    // ✅ Update Booking Discount
-    @PutMapping("/{id}/discount")
-    public ResponseEntity<?> updateDiscount(@PathVariable Long id, @RequestBody Map<String, Double> body) {
-        try {
-            Double discount = body.get("discount");
-            bookingService.updateBookingDiscount(id, discount);
-            return ResponseEntity.ok("Discount updated successfully.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Failed to update discount: " + e.getMessage());
-        }
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
     }
 
-
-
-<<<<<<< HEAD
-
-
-
-
-
-    // Fetch all bookings for a specific user
-
-
+    // ✅ Fetch a specific booking by ID
     @GetMapping("/{id}")
     public ResponseEntity<Customer> getBookingById(@PathVariable Long id) {
         Optional<Customer> customer = bookingService.getBookingDetailsById(id);
-
-        // Use the Optional to handle the presence/absence of the entity
         return customer.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                       .orElseGet(() -> ResponseEntity.notFound().build());
     }
-=======
-    // Fetch all bookings for a specific user
-
-
-
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
-
-
 }

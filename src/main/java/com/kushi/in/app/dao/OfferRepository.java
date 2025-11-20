@@ -6,8 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OfferRepository extends JpaRepository<Offer, Long> {
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788

@@ -1,10 +1,10 @@
 package com.kushi.in.app.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.time.LocalDateTime;
 
 public class CustomerDTO {
+
     private Long booking_id;
     private Integer customer_id;
     private Long userId;
@@ -14,34 +14,45 @@ public class CustomerDTO {
     private String address_line_1;
     private String city;
     private Double totalAmount;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDateTime bookingDate;
+
     private String bookingStatus;
     private String booking_time;
     private String booking_service_name;
     private Double booking_amount;
-<<<<<<< HEAD
+
+    // NEW FIELDS
     private Double discount;
     private Double grand_total;
     private String payment_method;
     private String payment_status;
-=======
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
-
 
     // No-arg constructor
-    public CustomerDTO() {
-    }
+    public CustomerDTO() {}
 
-<<<<<<< HEAD
-    public CustomerDTO(Long booking_id, Integer customer_id, Long userId, String customer_name, String customer_email, String customer_number, String address_line_1, String city, Double totalAmount, LocalDateTime bookingDate, String bookingStatus, String booking_time, String booking_service_name, Double booking_amount, Double discount, Double grand_total, String payment_method, String payment_status) {
-=======
-    // Existing full-arg constructor
-    public CustomerDTO(Long booking_id, Long userId, String customer_name, String customer_email, String customer_number,
-                       String address_line_1, String city, Double totalAmount, LocalDateTime bookingDate,
-                       String bookingStatus, String booking_time, String booking_service_name, Double booking_amount, Integer customer_id ){
-
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
+    // Full constructor
+    public CustomerDTO(
+            Long booking_id,
+            Integer customer_id,
+            Long userId,
+            String customer_name,
+            String customer_email,
+            String customer_number,
+            String address_line_1,
+            String city,
+            Double totalAmount,
+            LocalDateTime bookingDate,
+            String bookingStatus,
+            String booking_time,
+            String booking_service_name,
+            Double booking_amount,
+            Double discount,
+            Double grand_total,
+            String payment_method,
+            String payment_status
+    ) {
         this.booking_id = booking_id;
         this.customer_id = customer_id;
         this.userId = userId;
@@ -54,26 +65,15 @@ public class CustomerDTO {
         this.bookingDate = bookingDate;
         this.bookingStatus = bookingStatus;
         this.booking_time = booking_time;
-<<<<<<< HEAD
         this.booking_service_name = booking_service_name;
         this.booking_amount = booking_amount;
         this.discount = discount;
         this.grand_total = grand_total;
         this.payment_method = payment_method;
         this.payment_status = payment_status;
-=======
-        this.booking_amount = booking_amount;
-        this.booking_service_name = booking_service_name;
-        this.customer_id = customer_id;
-
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
     }
 
-
-
-
-
-    // Getters and setters...
+    // Getters and Setters
 
     public Long getBooking_id() {
         return booking_id;
@@ -81,6 +81,14 @@ public class CustomerDTO {
 
     public void setBooking_id(Long booking_id) {
         this.booking_id = booking_id;
+    }
+
+    public Integer getCustomer_id() {
+        return customer_id;
+    }
+
+    public void setCustomer_id(Integer customer_id) {
+        this.customer_id = customer_id;
     }
 
     public Long getUserId() {
@@ -135,8 +143,8 @@ public class CustomerDTO {
         return totalAmount;
     }
 
-    public void setTotalAmount(Double total_amount) {
-        this.totalAmount = total_amount;
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
     public LocalDateTime getBookingDate() {
@@ -179,15 +187,6 @@ public class CustomerDTO {
         this.booking_amount = booking_amount;
     }
 
-    public Integer getCustomer_id() {
-        return customer_id;
-    }
-
-    public void setCustomer_id(Integer customer_id) {
-        this.customer_id = customer_id;
-    }
-
-<<<<<<< HEAD
     public Double getDiscount() {
         return discount;
     }
@@ -219,7 +218,4 @@ public class CustomerDTO {
     public void setPayment_status(String payment_status) {
         this.payment_status = payment_status;
     }
-=======
-
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
 }

@@ -5,7 +5,6 @@ import com.kushi.in.app.dao.UserRepository;
 import com.kushi.in.app.entity.Customer;
 import com.kushi.in.app.entity.User;
 import com.kushi.in.app.model.*;
-
 import com.kushi.in.app.service.OrderService;
 import com.kushi.in.app.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -17,26 +16,25 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(
-        origins = "https://main.dhtawzq4yzgjo.amplifyapp.com",  // Your React app URL
+        origins = "https://main.dhtawzq4yzgjo.amplifyapp.com",
         allowCredentials = "true"
 )
-
 public class UserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
     private final OrderService orderService;
+    private final CustomerRepository customerRepository;
 
-    private final CustomerRepository customerRepository; // ✅ Add this
-
-    public UserController(UserService userService,
-                          UserRepository userRepository,
-                          OrderService orderService,
-                          CustomerRepository customerRepository) {
+    public UserController(
+            UserService userService,
+            UserRepository userRepository,
+            OrderService orderService,
+            CustomerRepository customerRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.orderService = orderService;
-        this.customerRepository = customerRepository; // ✅ Initialize
+        this.customerRepository = customerRepository;
     }
 
     @PostMapping("/signup")
@@ -80,12 +78,6 @@ public class UserController {
         return ResponseEntity.ok(saved);
     }
 
-
-
-
-
-
-
     // ⭐️ Rating update endpoint
     @PutMapping("/bookings/{id}/rating")
     public ResponseEntity<String> rateBooking(
@@ -95,63 +87,51 @@ public class UserController {
         return ResponseEntity.ok("Rating and feedback saved successfully");
     }
 
-
-    // ✅ Fetch logged-in user's bookings based on email passed as query param
-    // Fetch logged-in user's bookings based on email passed as query param
+    // Fetch logged-in user's bookings
     @GetMapping("/bookings/logged-in")
     public ResponseEntity<List<Customer>> getLoggedInBookings(@RequestParam("email") String email) {
         if (email == null || email.isEmpty()) {
-            return ResponseEntity.badRequest().build(); // 400 if email not provided
+            return ResponseEntity.badRequest().build();
         }
 
-        // Find user by email
-        User user = userRepository.findByEmail(email)
+        // Ensure user exists
+        userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
-        // Fetch bookings for this user
         List<Customer> bookings = orderService.getBookingsForUserByEmail(email);
 
         if (bookings.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 204 if no bookings found
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(bookings);
     }
 
-
-
-    // ✅ Create a new booking for logged-in user
+    // Logged-in user creates a booking
     @PostMapping("/bookings/logged-in/{userId}")
-    public ResponseEntity<Customer> createBooking(@PathVariable Long userId, @RequestBody Customer booking) {
-        // Set the user for this booking
+    public ResponseEntity<Customer> createBooking(
+            @PathVariable Long userId,
+            @RequestBody Customer booking) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
         booking.setUser(user);
         booking.setCustomer_email(user.getEmail());
 
         Customer savedBooking = customerRepository.save(booking);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedBooking);
     }
-<<<<<<< HEAD
 
+    // ⭐ New Public Reviews Endpoint
     @GetMapping("/public/reviews")
     public ResponseEntity<List<Customer>> getPublicReviews() {
-        // 1. Create this new method in CustomerRepository or OrderService
         List<Customer> reviews = orderService.getPublishedReviews();
 
         if (reviews.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
-        // 2. IMPORTANT: Use a DTO (Data Transfer Object) here instead of returning
-        //    the full Customer entity to prevent exposing sensitive data.
-        return ResponseEntity.ok(reviews); // Placeholder, use DTO in production
+        return ResponseEntity.ok(reviews); // In production, use DTOs for safety
     }
-
-=======
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
 }
-
-
-
-

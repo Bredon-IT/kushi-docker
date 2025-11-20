@@ -11,11 +11,7 @@ public class Offer {
     private Long id;
 
     @Column(nullable = false)
-<<<<<<< HEAD
-    private String text = "";
-=======
-    private String text;
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
+    private String text = "";   // safe default
 
     @Column(name = "image_url")
     private String imageUrl;
@@ -24,31 +20,26 @@ public class Offer {
     private String color;
     private String emoji;
 
-<<<<<<< HEAD
-    // banner-specific fields
+    // Banner-specific fields
     private String title;
     private String link;
 
-    // Constructors, getters, setters
+    // Constructors
     public Offer() {}
 
-=======
-    // Constructors, getters, setters
-    public Offer() {}
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
-    public Offer(String text, String imageUrl) { this.text = text; this.imageUrl = imageUrl; }
+    public Offer(String text, String imageUrl) {
+        this.text = (text == null ? "" : text);
+        this.imageUrl = imageUrl;
+    }
 
+    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-<<<<<<< HEAD
-
     public String getText() { return text; }
-    public void setText(String text) { this.text = (text == null ? "" : text); }
-=======
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
+    public void setText(String text) {
+        this.text = (text == null ? "" : text);
+    }
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
@@ -61,7 +52,6 @@ public class Offer {
 
     public String getEmoji() { return emoji; }
     public void setEmoji(String emoji) { this.emoji = emoji; }
-<<<<<<< HEAD
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -69,7 +59,3 @@ public class Offer {
     public String getLink() { return link; }
     public void setLink(String link) { this.link = link; }
 }
-
-=======
-}
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788

@@ -11,14 +11,11 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
-
-    // ✅ Step 1: Sync user_id based on email
+    // ✅ Sync user_id based on email
     @Modifying
     @Transactional
     @Query(value = "UPDATE tbl_booking_info b " +
@@ -27,27 +24,26 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             "WHERE b.customer_email = :email", nativeQuery = true)
     void updateUserIdByEmail(@Param("email") String email);
 
-
-    // ✅ Step 2: Fetch bookings by user_id
+    // ✅ User-based queries
     List<Customer> findByUser_Id(Long userId);
-
     List<Customer> findByBookingStatus(String bookingStatus);
-
     List<Customer> findByUserIsNotNull();
-
     List<Customer> findByUserIsNull();
-
     List<Customer> findAllByOrderByBookingDateDesc();
 
+    // Completed bookings
     @Query("SELECT c FROM Customer c WHERE c.bookingStatus = 'Completed'")
     List<Customer> findCompletedBookings();
 
-    // DTO projection example
-    @Query("SELECT CustomerDTO(c.booking_id, c.user.id, c.customer_name, c.customer_email, c.customer_number, c.address_line_1, c.city, c.totalAmount, c.bookingDate, c.bookingStatus, c.booking_time) FROM Customer c")
+    // DTO projection
+    @Query("SELECT new com.kushi.in.app.model.CustomerDTO(" +
+            "c.booking_id, c.user.id, c.customer_name, c.customer_email, " +
+            "c.customer_number, c.address_line_1, c.city, c.totalAmount, " +
+            "c.bookingDate, c.bookingStatus, c.booking_time" +
+            ") FROM Customer c")
     List<CustomerDTO> findAllCustomersDTO();
 
-
-    // ✅ Add this method to fetch bookings by category and date range
+    // Category + date filter
     @Query("SELECT c FROM Customer c WHERE (:category IS NULL OR c.serviceCategory = :category) " +
             "AND (:startDate IS NULL OR c.bookingDate >= :startDate) " +
             "AND (:endDate IS NULL OR c.bookingDate <= :endDate)")
@@ -55,24 +51,21 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
                                                  @Param("startDate") LocalDateTime startDate,
                                                  @Param("endDate") LocalDateTime endDate);
 
-
-    // Sync all bookings: assign user_id if email matches
+    // Sync all bookings
     @Modifying
     @Transactional
     @Query(value = """
-                UPDATE tbl_booking_info b
-                JOIN tbl_users u ON b.customer_email = u.email
-                SET b.user_id = u.id
-                WHERE b.user_id IS NULL
+            UPDATE tbl_booking_info b
+            JOIN tbl_users u ON b.customer_email = u.email
+            SET b.user_id = u.id
+            WHERE b.user_id IS NULL
             """, nativeQuery = true)
     void syncUserIdsWithEmails();
 
+    // Fetch bookings by user email
     @Query("SELECT c FROM Customer c JOIN c.user u WHERE u.email = :email ORDER BY c.bookingDate DESC")
     List<Customer> findBookingsByUserEmail(String email);
 
-<<<<<<< HEAD
-
+    // ⭐ Added (resolved merge conflict)
     List<Customer> findAllByRatingIsNotNullAndFeedbackIsNotNull();
-=======
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
 }

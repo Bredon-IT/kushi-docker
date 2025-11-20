@@ -13,11 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/gallery")
-<<<<<<< HEAD
-@CrossOrigin(origins ={"https://main.dhtawzq4yzgjo.amplifyapp.com"})
-=======
-@CrossOrigin(origins ={ "https://main.dhtawzq4yzgjo.amplifyapp.com", "https://main.dhtawzq4yzgjo.amplifyapp.com"})
->>>>>>> f0144ebd8f89dd88c5fff2bf7939a03f55b7b788
+@CrossOrigin(origins = {"https://main.dhtawzq4yzgjo.amplifyapp.com"})
 public class GalleryController {
 
     @Autowired
@@ -25,9 +21,10 @@ public class GalleryController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(
-            @RequestParam(value="file", required=false) MultipartFile file,
-            @RequestParam(value="fileUrl", required=false) String fileUrl,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "fileUrl", required = false) String fileUrl,
             @RequestParam("description") String description) {
+
         try {
             galleryService.saveFile(file, fileUrl, description);
             return ResponseEntity.ok("File uploaded successfully");
@@ -36,7 +33,6 @@ public class GalleryController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Upload failed");
         }
     }
-    // ✅ properly closed uploadFile method
 
     @GetMapping
     public ResponseEntity<List<GalleryDTO>> getAllFiles() {
@@ -53,8 +49,10 @@ public class GalleryController {
     public ResponseEntity<String> updateDescription(
             @PathVariable Long id,
             @RequestBody Map<String, String> payload) {
+
         String description = payload.get("description");
         boolean updated = galleryService.updateDescription(id, description);
+
         if (updated) {
             return ResponseEntity.ok("Description updated successfully");
         } else {
