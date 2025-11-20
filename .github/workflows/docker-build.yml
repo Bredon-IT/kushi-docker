@@ -36,5 +36,5 @@ jobs:
       - name: Deploy to AWS AppRunner
         run: |
           aws apprunner update-service \
-            --service-arn arn:aws:apprunner:${{ secrets.AWS_REGION }}:<YOUR_ACCOUNT_ID>:service/kushi-docker-service \
-            --source-configuration "ImageRepository={ImageIdentifier=${IMAGE_URI},ImageRepositoryType=ECR Public,ImageConfiguration={Port=8443}}"
+            --service-arn arn:aws:apprunner:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:service/kushi-docker-service \
+            --source-configuration ImageRepository={ImageIdentifier=${IMAGE_URI},ImageRepositoryType="ECR",ImageConfiguration={Port=8443}}
