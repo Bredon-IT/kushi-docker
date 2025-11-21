@@ -19,7 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = {"https://main.dhtawzq4yzgjo.amplifyapp.com","https://bredongroups.com","https://kushiservices.com"}) // Update with actual frontend URL for production
+@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"}) // Update with actual frontend URL for production
 public class AdminController {
 
     private AdminService adminService;

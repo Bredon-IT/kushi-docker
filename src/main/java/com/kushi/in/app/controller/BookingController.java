@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/bookings")
-@CrossOrigin(origins = {"https://main.dhtawzq4yzgjo.amplifyapp.com","https://bredongroups.com","https://kushiservices.com"})
+@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"})
 
  // frontend React dev server
 public class BookingController {

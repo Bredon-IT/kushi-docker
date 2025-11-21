@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/contact")
-@CrossOrigin(origins = {"https://main.dhtawzq4yzgjo.amplifyapp.com","https://bredongroups.com","https://kushiservices.com"})
+@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"})
 public class ContactRequestController {
 
     @Autowired

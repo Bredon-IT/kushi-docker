@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = {"https://main.dhtawzq4yzgjo.amplifyapp.com","https://bredongroups.com","https://kushiservices.com"},
+@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"},
         allowCredentials = "true"
 )
 

@@ -24,7 +24,7 @@ import java.util.Map;
 @RestController
 
 @RequestMapping("/api/customers")
-@CrossOrigin(origins = {"https://main.dhtawzq4yzgjo.amplifyapp.com","https://bredongroups.com","https://kushiservices.com"})
+@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"})
 public class CustomerController {
 
     private final CustomerService customerService;
