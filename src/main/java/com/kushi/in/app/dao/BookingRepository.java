@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Repository
 public interface BookingRepository extends JpaRepository<Customer, Long> {
 
@@ -15,5 +18,16 @@ public interface BookingRepository extends JpaRepository<Customer, Long> {
     @Modifying
     @Query("UPDATE Customer c SET c.bookingStatus = :status WHERE c.booking_id = :id")
     void updateBookingStatus(@Param("id") Long bookingId, @Param("status") String status);
+
+
+    // Example custom query (optional, for filtering pending inspections)
+    List<Customer> findByInspectionStatus(String status);
+
+
+    //to get todays schedule
+    @Query("SELECT c FROM Customer c WHERE DATE(c.bookingDate) = :today")
+    List<Customer> findBookingsByDate(@Param("today") LocalDate today);
+
+
 
 }

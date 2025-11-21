@@ -14,6 +14,9 @@ public class OrderDTO {
     private Integer rating;
     private String status;
 
+    // ✅ ADDED FIELD: Inspection Status (e.g., "completed", "pending", "cancelled", "confirmed")
+    private String inspection_status;
+
     public Long getId() {
         return id;
     }
@@ -68,5 +71,13 @@ public class OrderDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getInspection_status() {
+        return inspection_status;
+    }
+
+    public void setInspection_status(String inspection_status) {
+        this.inspection_status = inspection_status;
     }
 }

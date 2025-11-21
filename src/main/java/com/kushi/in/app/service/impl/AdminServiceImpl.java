@@ -1,86 +1,112 @@
 package com.kushi.in.app.service.impl;
 
 import com.kushi.in.app.dao.AdminRepository;
+
+
 import com.kushi.in.app.dao.CustomerRepository;
 import com.kushi.in.app.entity.Customer;
 import com.kushi.in.app.entity.Services;
 import com.kushi.in.app.model.CustomerDTO;
 import com.kushi.in.app.model.InvoiceDTO;
+import com.kushi.in.app.model.RecentActivityDTO;
 import com.kushi.in.app.model.ServiceDTO;
 import com.kushi.in.app.service.AdminService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 @Service
 public class AdminServiceImpl implements AdminService {
 
-    private final AdminRepository adminRepository;
+    @Autowired
+    private AdminRepository adminRepository;
+    @Autowired
     private final CustomerRepository customerRepository;
 
-    @Autowired
     public AdminServiceImpl(AdminRepository adminRepository, CustomerRepository customerRepository) {
         this.adminRepository = adminRepository;
         this.customerRepository = customerRepository;
     }
 
+
     @Override
     public List<Customer> getAllBookings() {
+        // Retrieves all booking records from the database
         return adminRepository.findAll();
     }
 
+
+    // Saves a new booking to the database
     @Override
     public Customer saveBooking(Customer customer) {
         return adminRepository.save(customer);
     }
 
+    // Assigns a worker to an existing booking based on the booking ID
     @Override
     public void assignWorker(Long bookingId, String workerName) {
         Customer booking = adminRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        String existing = booking.getWorker_assign();
+        String existing = booking.getWorker_assign(); // assume it's a comma-separated string
         if (existing == null || existing.trim().isEmpty()) {
             booking.setWorker_assign(workerName);
         } else {
             booking.setWorker_assign(existing + "," + workerName);
         }
-        adminRepository.save(booking);
+
+        adminRepository.save(booking); // this **persists in DB**
     }
+
 
     @Override
     public Map<String, Object> getbookingStatistics(String timePeriod) {
         List<Customer> bookings = adminRepository.findAll();
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();  // use LocalDateTime since entity has LocalDateTime
 
         bookings = bookings.stream()
-                .filter(b -> b.getBookingDate() != null &&
-                        switch (timePeriod.toLowerCase()) {
-                            case "one-week" -> b.getBookingDate().isAfter(now.minusWeeks(1));
-                            case "two-weeks" -> b.getBookingDate().isAfter(now.minusWeeks(2));
-                            case "one-month" -> b.getBookingDate().isAfter(now.minusMonths(1));
-                            default -> true;
+                .filter(b -> Optional.ofNullable(b.getBookingDate())
+                        .map(date -> {
+                            switch (timePeriod.toLowerCase()) {
+                                case "one-week":
+                                    return date.isAfter(now.minusWeeks(1));
+                                case "two-weeks":
+                                    return date.isAfter(now.minusWeeks(2));
+                                case "one-month":
+                                    return date.isAfter(now.minusMonths(1));
+                                default:
+                                    return true;
+                            }
                         })
+                        .orElse(false))
                 .collect(Collectors.toList());
 
-        Map<String, Double> serviceRevenue = new LinkedHashMap<>();
+        Map<String, Double> serviceRevenue = new HashMap<>();
         double totalAmount = 0.0;
 
         for (Customer booking : bookings) {
+            String service = booking.getBooking_service_name();
+            // ✅ Safe null handling
             double amount = booking.getTotalAmount() != null ? booking.getTotalAmount() : 0.0;
             totalAmount += amount;
-            serviceRevenue.merge(booking.getBooking_service_name(), amount, Double::sum);
+            serviceRevenue.put(service, serviceRevenue.getOrDefault(service, 0.0) + amount);
         }
 
+        // ✅ Booking Trends by Date
         Map<LocalDate, Long> bookingTrends = bookings.stream()
                 .filter(b -> b.getBookingDate() != null)
                 .collect(Collectors.groupingBy(
-                        b -> b.getBookingDate().toLocalDate(),
+                        b -> b.getBookingDate().toLocalDate(), // convert LocalDateTime → LocalDate
                         TreeMap::new,
                         Collectors.counting()
                 ));
@@ -96,45 +122,193 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Map<String, Object> getOverview(String timePeriod) {
+    public Map<String, Object> getFinancialStatistics(String filter, String startDate, String endDate) {
+
         List<Customer> bookings = adminRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start;
+        LocalDateTime end = now;
 
-        bookings = bookings.stream()
+        // ===========================
+        //      FILTER LOGIC
+        // ===========================
+        if (filter != null) {
+            switch (filter.toLowerCase()) {
+
+                case "today":
+                    start = now.toLocalDate().atStartOfDay();
+                    break;
+
+                case "month":
+                    start = now.toLocalDate().withDayOfMonth(1).atStartOfDay();
+                    break;
+
+                case "year":
+                    start = now.toLocalDate().withDayOfYear(1).atStartOfDay();
+                    break;
+
+
+                case "custom":
+                    if (startDate != null && endDate != null) {
+                        start = LocalDate.parse(startDate).atStartOfDay();
+                        end = LocalDate.parse(endDate).atTime(23, 59, 59);
+                    } else {
+                        start = LocalDate.of(2000,1,1).atStartOfDay();
+                    }
+                    break;
+
+                default:
+                    start = LocalDate.of(2000,1,1).atStartOfDay();
+            }
+        } else {
+            if (startDate != null && endDate != null) {
+                start = LocalDate.parse(startDate).atStartOfDay();
+                end = LocalDate.parse(endDate).atTime(23,59,59);
+            } else {
+                start = LocalDate.of(2000,1,1).atStartOfDay();
+            }
+        }
+
+        LocalDateTime finalStart = start;
+        LocalDateTime finalEnd = end;
+
+        // APPLY FILTER
+        List<Customer> filtered = bookings.stream()
                 .filter(b -> b.getBookingDate() != null &&
-                        switch (timePeriod.toLowerCase()) {
-                            case "one-week" -> b.getBookingDate().isAfter(now.minusWeeks(1));
-                            case "two-weeks" -> b.getBookingDate().isAfter(now.minusWeeks(2));
-                            case "one-month" -> b.getBookingDate().isAfter(now.minusMonths(1));
-                            default -> true;
-                        })
+                        !b.getBookingDate().isBefore(finalStart) &&
+                        !b.getBookingDate().isAfter(finalEnd))
                 .collect(Collectors.toList());
 
-        double totalAmount = bookings.stream()
+        // ===========================
+        //      CALCULATE STATS
+        // ===========================
+        double totalAmount = filtered.stream()
                 .mapToDouble(b -> b.getTotalAmount() != null ? b.getTotalAmount() : 0.0)
                 .sum();
 
-        long totalCustomers = bookings.stream()
+        int totalCustomers = (int) filtered.stream()
                 .map(Customer::getCustomer_id)
-                .filter(Objects::nonNull)
                 .distinct()
                 .count();
 
-        int totalBookings = bookings.size();
+        // Revenue by Service
+        Map<String, Double> revenueByService = new LinkedHashMap<>();
+        for (Customer b : filtered) {
+            String service = b.getBooking_service_name();
+            double amount = (b.getTotalAmount() != null) ? b.getTotalAmount() : 0.0;
 
-        double monthlyIncome = bookings.stream()
+            revenueByService.put(service,
+                    revenueByService.getOrDefault(service, 0.0) + amount);
+        }
+
+        // Booking Trends (per date)
+        Map<LocalDate, Long> bookingTrends = filtered.stream()
+                .filter(b -> b.getBookingDate() != null)
+                .collect(Collectors.groupingBy(
+                        b -> b.getBookingDate().toLocalDate(),
+                        TreeMap::new,
+                        Collectors.counting()
+                ));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("labels", revenueByService.keySet());
+        result.put("data", revenueByService.values());
+        result.put("totalbooking_amount", totalAmount);
+        result.put("totalcustomers", totalCustomers);
+        result.put("bookingTrends", bookingTrends);
+
+        return result;
+    }
+
+
+
+    @Override
+    public Map<String, Object> getOverview(String filter, String startDate, String endDate) {
+
+        List<Customer> bookings = adminRepository.findAll();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start;
+        LocalDateTime end = now;
+
+        // ===========================
+        //       FILTER LOGIC
+        // ===========================
+        if (filter != null) {
+            switch (filter.toLowerCase()) {
+
+                case "today":
+                    start = now.toLocalDate().atStartOfDay();
+                    break;
+
+                case "month":
+                    start = now.withDayOfMonth(1).toLocalDate().atStartOfDay();
+                    break;
+
+                case "year":
+                    start = now.withDayOfYear(1).toLocalDate().atStartOfDay();
+                    break;
+
+                case "custom":
+                    if (startDate != null && endDate != null) {
+                        start = LocalDate.parse(startDate).atStartOfDay();
+                        end = LocalDate.parse(endDate).atTime(23, 59, 59);
+                    } else {
+                        start = LocalDate.of(2000, 1, 1).atStartOfDay();
+                    }
+                    break;
+
+                default:
+                    start = LocalDate.of(2000, 1, 1).atStartOfDay();
+            }
+
+        } else {
+            // no filter → custom but filter missing
+            if (startDate != null && endDate != null) {
+                start = LocalDate.parse(startDate).atStartOfDay();
+                end = LocalDate.parse(endDate).atTime(23, 59, 59);
+            } else {
+                start = LocalDate.of(2000, 1, 1).atStartOfDay();
+            }
+        }
+
+        // ===========================
+        //     APPLY FILTER
+        // ===========================
+        LocalDateTime finalStart = start;
+        LocalDateTime finalEnd = end;
+
+        List<Customer> filteredBookings = bookings.stream()
                 .filter(b -> b.getBookingDate() != null &&
-                        b.getBookingDate().getMonth() == now.getMonth() &&
-                        b.getBookingDate().getYear() == now.getYear())
+                        !b.getBookingDate().isBefore(finalStart) &&
+                        !b.getBookingDate().isAfter(finalEnd))
+                .collect(Collectors.toList());
+
+        // ===========================
+        //     CALCULATE VALUES
+        // ===========================
+        double totalAmount = filteredBookings.stream()
                 .mapToDouble(b -> b.getTotalAmount() != null ? b.getTotalAmount() : 0.0)
                 .sum();
 
-        double totalExpenses = bookings.stream()
+        int totalCustomers = (int) filteredBookings.stream()
+                .map(Customer::getCustomer_id)
+                .distinct()
+                .count();
+
+        int totalBookings = filteredBookings.size();
+
+        // monthlyIncome should be based on filtered range, not current month
+        double monthlyIncome = totalAmount;
+
+        double totalExpenses = filteredBookings.stream()
                 .mapToDouble(b -> b.getServices() != null ? b.getServices().getService_cost() : 0.0)
                 .sum();
 
         double netProfit = totalAmount - totalExpenses;
 
+        // ===========================
+        //     BUILD RESPONSE
+        // ===========================
         Map<String, Object> overview = new HashMap<>();
         overview.put("totalAmount", totalAmount);
         overview.put("totalCustomers", totalCustomers);
@@ -145,49 +319,113 @@ public class AdminServiceImpl implements AdminService {
         return overview;
     }
 
+
+
+
+
     @Override
     public List<Customer> getRecentBookingsByDate() {
         return adminRepository.findAll().stream()
-                .filter(b -> b.getBookingDate() != null)
+                .filter(customer -> customer.getBookingDate() != null)
                 .sorted(Comparator.comparing(Customer::getBookingDate).reversed())
-                .limit(5)
+                .limit(5) // Optional: Limit to recent 10 bookings
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<String> getVisitStatuses() {
         return adminRepository.findAll().stream()
-                .map(customer ->
-                        "Completed".equalsIgnoreCase(customer.getBookingStatus()) ?
-                                "visit completed" : "visit not completed")
-                .collect(Collectors.toList());
+                .map(customer -> {
+
+                    if ("Completed".equalsIgnoreCase(customer.getBookingStatus())) {
+                        return "visit completed";
+                    } else {
+                        return "visit not completed";
+                    }
+
+
+                }).collect(Collectors.toList());
     }
 
     @Override
     public List<String> updateVisitStatuses() {
         return adminRepository.findAll().stream()
                 .map(customer -> {
-                    String status = "Completed".equalsIgnoreCase(customer.getBookingStatus())
-                            ? "visit completed" : "visit not completed";
+                    String status;
+                    if ("Completed".equalsIgnoreCase(customer.getBookingStatus())) {
+                        status = "visit completed";
+                    } else {
+                        status = "visit not completed";
+                    }
+
                     customer.setSite_visit(status);
                     adminRepository.save(customer);
                     return status;
-                })
-                .collect(Collectors.toList());
+
+                }).collect(Collectors.toList());
     }
 
-    @Override
-    public List<Map<String, Object>> getRevenueByService() {
 
-        List<Object[]> results = adminRepository.getRevenueByService();
+    @Override
+    public List<Map<String, Object>> getRevenueByService(String filter, String startDate, String endDate) {
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start;
+        LocalDateTime endTime = now;
+
+        if (filter != null) {
+            switch (filter.toLowerCase()) {
+                case "today":
+                    start = now.toLocalDate().atStartOfDay();
+                    break;
+                case "month":
+                    start = now.withDayOfMonth(1).toLocalDate().atStartOfDay();
+                    break;
+                case "year":
+                    start = now.withDayOfYear(1).toLocalDate().atStartOfDay();
+                    break;
+                default:
+                    start = LocalDate.of(2000, 1, 1).atStartOfDay();
+            }
+        }
+        else if (startDate != null && endDate != null) {
+            start = LocalDate.parse(startDate).atStartOfDay();
+            endTime = LocalDate.parse(endDate).atTime(23, 59, 59);
+        }
+        else {
+            start = LocalDate.of(2000, 1, 1).atStartOfDay();
+        }
+
+        // ====== APPLY DATE FILTER IN JAVA ======
+        List<Customer> bookings = adminRepository.findAll();
+
+        LocalDateTime finalStart = start;
+        LocalDateTime finalEnd = endTime;
+
+        List<Customer> filtered = bookings.stream()
+                .filter(b -> b.getBookingDate() != null &&
+                        !b.getBookingDate().isBefore(finalStart) &&
+                        !b.getBookingDate().isAfter(finalEnd))
+                .collect(Collectors.toList());
+
+        // ====== GROUP BY SERVICE AND CALCULATE REVENUE ======
+        Map<String, Double> result = new HashMap<>();
+
+        for (Customer b : filtered) {
+            String service = b.getBooking_service_name();
+            double amount = b.getTotalAmount() != null ? b.getTotalAmount() : 0.0;
+
+            result.put(service, result.getOrDefault(service, 0.0) + amount);
+        }
+
+        // Convert to List<Map<String, Object>> (your frontend expects this)
         List<Map<String, Object>> response = new ArrayList<>();
 
-        for (Object[] row : results) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("serviceName", row[0]);
-            map.put("totalRevenue", row[1]);
-            map.put("bookingCount", row[2]);
-            response.add(map);
+        for (String service : result.keySet()) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("serviceName", service);
+            entry.put("totalRevenue", result.get(service));
+            response.add(entry);
         }
 
         return response;
@@ -203,88 +441,103 @@ public class AdminServiceImpl implements AdminService {
         return adminRepository.countPendingApprovals();
     }
 
+
     @Override
     public List<CustomerDTO> getTopBookedCustomers() {
         List<Object[]> results = adminRepository.findTopBookedCustomers();
 
         return results.stream().map(obj -> {
             CustomerDTO dto = new CustomerDTO();
-            dto.setCustomer_email((String) obj[0]);
-            dto.setCustomer_name((String) obj[1]);
-            dto.setBooking_amount(((Number) obj[2]).doubleValue());
+
+            dto.setCustomer_email((String) obj[0]);         // customer_email
+            dto.setCustomer_name((String) obj[1]);          // customer_name
+            dto.setBooking_amount(((Number) obj[2]).doubleValue()); // booking_count (optional field)
             dto.setAddress_line_1((String) obj[3]);
             dto.setCustomer_number((String) obj[4]);
             dto.setTotalAmount(((Number) obj[5]).doubleValue());
+
             return dto;
         }).collect(Collectors.toList());
     }
 
+
     @Override
     public List<Map<String, Object>> getTopServices() {
         List<Object[]> results = adminRepository.findTopServices(PageRequest.of(0, 10));
+        List<Map<String, Object>> responseList = new ArrayList<>();
 
-        List<Map<String, Object>> list = new ArrayList<>();
         for (Object[] row : results) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("booking_service_name", row[0]);
-            map.put("service_image_url", row[1]);
-            map.put("service_description", row[2]);
-            map.put("bookingCount", ((Number) row[3]).longValue());
-            map.put("service_name", row[4]);
-            list.add(map);
+            Map<String, Object> servicesData = new HashMap<>();
+            servicesData.put("booking_service_name", row[0]); // service_name
+            servicesData.put("service_image_url", row[1]);
+            servicesData.put("service_description", row[2]);
+            servicesData.put("bookingCount", ((Number) row[3]).longValue());
+            servicesData.put("service_name", row[4]);
+            responseList.add(servicesData);
         }
-        return list;
+
+        return responseList;
     }
+
 
     @Override
     public List<ServiceDTO> getTopRatedServices() {
-        return adminRepository.findTopRatedServices().stream()
-                .map(r -> new ServiceDTO(
-                        (String) r[0],
-                        ((Number) r[1]).doubleValue(),
-                        ((Number) r[2]).longValue(),
-                        (String) r[3],
-                        ((Number) r[4]).doubleValue(),
-                        (String) r[5]
+        List<Object[]> results = adminRepository.findTopRatedServices();
+        return results.stream()
+                .map(obj -> new ServiceDTO(
+                        (String) obj[0],
+                        ((Number) obj[1]).doubleValue(),
+                        ((Number) obj[2]).longValue(),
+                        (String) obj[3],
+                        ((Number) obj[4]).doubleValue(),
+                        (String) obj[5]
                 ))
                 .collect(Collectors.toList());
     }
 
+
     @Override
     public List<InvoiceDTO> getAllInvoices() {
+        // Fetch customers ordered by booking date
         List<Customer> customers = customerRepository.findAllByOrderByBookingDateDesc();
 
         return customers.stream()
+                .filter(Objects::nonNull)
                 .map(customer -> {
                     InvoiceDTO dto = new InvoiceDTO();
 
+                    // Booking Details
                     dto.setBooking_id(customer.getBooking_id());
                     dto.setBookingDate(customer.getBookingDate());
-                    dto.setBooking_amount(customer.getBooking_amount());
-                    dto.setTotalAmount(customer.getTotalAmount());
+                    dto.setBooking_amount(customer.getBooking_amount() != null ? customer.getBooking_amount() : 0.0);
+                    dto.setTotal_amount(customer.getTotalAmount() != null ? customer.getTotalAmount() : 0.0);
                     dto.setWorker_assign(customer.getWorker_assign());
                     dto.setCity(customer.getCity());
                     dto.setBooking_service_name(customer.getBooking_service_name());
                     dto.setDiscount(customer.getDiscount());
                     dto.setGrand_total(customer.getGrand_total());
-                    dto.setPayment_method(customer.getPayment_method());
-                    dto.setPayment_status(customer.getPayment_status());
+                    dto.setPayment_method(customer.getPaymentMethod());
+                    dto.setPayment_status(customer.getPaymentStatus());
+
+                    // ✅ FIX: Map booking status
                     dto.setBookingStatus(customer.getBookingStatus());
 
+                    // Customer Details
                     dto.setCustomer_id(customer.getCustomer_id());
                     dto.setCustomer_name(customer.getCustomer_name());
                     dto.setCustomer_email(customer.getCustomer_email());
                     dto.setCustomer_number(customer.getCustomer_number());
                     dto.setAddress_line_1(customer.getAddress_line_1());
 
-                    Services s = customer.getServices();
-                    if (s != null) {
-                        dto.setService_id(s.getService_id());
-                        dto.setService_name(s.getService_name());
-                        dto.setService_type(s.getService_type());
-                        dto.setService_cost(s.getService_cost());
-                        dto.setService_details(s.getService_details());
-                        dto.setService_description(s.getService_description());
+                    // Service Details
+                    dto.setService_id(customer.getService_id());
+                    Services service = customer.getServices();
+                    if (service != null) {
+                        dto.setService_name(service.getService_name());
+                        dto.setService_type(service.getService_type());
+                        dto.setService_cost(service.getService_cost());
+                        dto.setService_details(service.getService_details());
+                        dto.setService_description(service.getService_description());
                     }
 
                     return dto;
@@ -292,75 +545,47 @@ public class AdminServiceImpl implements AdminService {
                 .collect(Collectors.toList());
     }
 
-    @Override
+
     public List<Map<String, Object>> getServiceReport() {
         List<Customer> bookings = adminRepository.findAll();
 
-        Map<String, List<Customer>> grouped = bookings.stream()
-                .filter(c -> c.getBooking_service_name() != null)
-                .collect(Collectors.groupingBy(Customer::getBooking_service_name));
+        Map<String, List<Customer>> groupedBookings = bookings.stream()
+                .filter(customer -> customer.getBooking_service_name() != null)
+                .collect(Collectors.groupingBy(Customer::getBooking_service_name, LinkedHashMap::new, Collectors.toList()));
 
         List<Map<String, Object>> result = new ArrayList<>();
 
-        for (String serviceName : grouped.keySet()) {
-            List<Customer> group = grouped.get(serviceName);
+        for (Map.Entry<String, List<Customer>> entry : groupedBookings.entrySet()) {
+            String booking_service_name = entry.getKey();
+            List<Customer> serviceBookings = entry.getValue();
 
-            double revenue = group.stream()
-                    .mapToDouble(c -> c.getTotalAmount() != null ? c.getTotalAmount() : 0.0)
+            double totalRevenue = serviceBookings.stream()
+                    .mapToDouble(Customer::getTotalAmount)
                     .sum();
 
+            int bookingCount = serviceBookings.size();
             Map<String, Object> map = new HashMap<>();
-            map.put("booking_Service_name", serviceName);
-            map.put("totalRevenue", revenue);
-            map.put("bookingCount", group.size());
+            map.put("booking_Service_name", booking_service_name);
+            map.put("totalRevenue", totalRevenue);
+            map.put("bookingCount", bookingCount);
+
             result.add(map);
         }
-
         return result;
     }
 
     @Override
-    public List<Map<String, Object>> getCategoryBookings(String category, String startDateStr, String endDateStr) {
-
-        LocalDateTime start = startDateStr != null && !startDateStr.isEmpty()
-                ? LocalDate.parse(startDateStr).atStartOfDay()
-                : null;
-
-        LocalDateTime end = endDateStr != null && !endDateStr.isEmpty()
-                ? LocalDate.parse(endDateStr).atTime(23, 59, 59)
-                : null;
-
-        List<Customer> bookings = customerRepository.findBookingsByCategoryAndDate(category, start, end);
-
-        Map<String, Map<String, Map<String, Long>>> result = new HashMap<>();
-
-        for (Customer c : bookings) {
-            String cat = c.getServices() != null ? c.getServices().getService_category() : "Unknown";
-            String sub = c.getServices() != null ? c.getServices().getService_type() : "Unknown";
-            String status = Optional.ofNullable(c.getBookingStatus()).orElse("Unknown").toLowerCase();
-
-            result
-                    .computeIfAbsent(cat, k -> new HashMap<>())
-                    .computeIfAbsent(sub, k -> new HashMap<>())
-                    .merge(status, 1L, Long::sum);
-        }
-
-        List<Map<String, Object>> response = new ArrayList<>();
-
-        for (String cat : result.keySet()) {
-            for (String sub : result.get(cat).keySet()) {
-                Map<String, Object> entry = new HashMap<>();
-                entry.put("category", cat);
-                entry.put("subcategory", sub);
-                Map<String, Long> st = result.get(cat).get(sub);
-
-                entry.put("completed", st.getOrDefault("completed", 0L));
-                entry.put("cancelled", st.getOrDefault("cancelled", 0L));
-
-                response.add(entry);
-            }
-        }
-
-        return response;
+    public List<RecentActivityDTO> getRecentActivities() {
+        return adminRepository.getRecentActivities().stream().map(c -> {
+            RecentActivityDTO dto = new RecentActivityDTO();
+            dto.setBooking_id(c.getBooking_id());
+            dto.setCustomer_name(c.getCustomer_name());
+            dto.setBookingStatus(c.getBookingStatus());
+            dto.setBooking_service_name(c.getBooking_service_name());
+            dto.setBookingDate(c.getBookingDate());
+            return dto;
+        }).collect(Collectors.toList());
     }
+
+
 }

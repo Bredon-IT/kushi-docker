@@ -6,6 +6,7 @@ import com.kushi.in.app.model.CustomerDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -37,7 +38,6 @@ public interface CustomerService {
 
     // Update status (Enable/Disable)
     String updateServiceStatus(Long serviceId, String status);
-
 
 
 

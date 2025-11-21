@@ -1,10 +1,11 @@
 package com.kushi.in.app.controller;
 
+
 import com.kushi.in.app.entity.Customer;
-import com.kushi.in.app.model.CustomerDTO;
-import com.kushi.in.app.model.InvoiceDTO;
-import com.kushi.in.app.model.ServiceDTO;
+import com.kushi.in.app.model.*;
 import com.kushi.in.app.service.AdminService;
+import com.kushi.in.app.service.BookingService;
+import com.kushi.in.app.service.CategoryWiseBookingService;
 import com.kushi.in.app.service.CustomerService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +19,24 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "https://main.dhtawzq4yzgjo.amplifyapp.com")
+@CrossOrigin(origins = "https://main.dhtawzq4yzgjo.amplifyapp.com") // Update with actual frontend URL for production
 public class AdminController {
 
-    private final AdminService adminService;
+    private AdminService adminService;
     private final CustomerService customerService;
+    private CategoryWiseBookingService categoryWiseBookingService;
+    private BookingService bookingService;
 
-    public AdminController(AdminService adminService, CustomerService customerService) {
+
+    // Constructor injection is preferred for better testability and immutability
+    public AdminController(AdminService adminService,
+                           CustomerService customerService,
+                           CategoryWiseBookingService categoryWiseBookingService,
+                           BookingService bookingService) {
         this.adminService = adminService;
         this.customerService = customerService;
+        this.categoryWiseBookingService = categoryWiseBookingService;
+        this.bookingService = bookingService;
     }
 
     // =======================
@@ -35,37 +45,54 @@ public class AdminController {
 
     @GetMapping("/all-bookings")
     public List<Customer> getAllBookings() {
+        // Returns all booking records from the database
         return adminService.getAllBookings();
     }
 
     @PostMapping("/new-booking")
     public Customer createBooking(@RequestBody Customer customer) {
+        // Saves a new booking record to the database
         return adminService.saveBooking(customer);
     }
 
-    // Assign workers
+    /// Assign workers
     @PutMapping("/{id}/assign-worker")
-    public ResponseEntity<String> assignWorker(
-            @PathVariable("id") Long bookingId,
-            @RequestBody Map<String, String> body) {
-
+    public ResponseEntity<String> assignWorker(@PathVariable("id") Long bookingId,
+                                               @RequestBody Map<String, String> body) {
         String workername = body.get("workername");
         adminService.assignWorker(bookingId, workername);
-
         return ResponseEntity.ok("Worker assigned successfully");
     }
+
 
     // =======================
     // 📌 Booking Stats
     // =======================
 
     @GetMapping("/statistics")
-    public ResponseEntity<Map<String, Object>> getBookingStatistics(
-            @RequestParam(value = "timePeriod", defaultValue = "all-time") String timePeriod) {
+
+    public ResponseEntity<Map<String , Object>> getbookingStatistics(
+            @RequestParam(value="timePeriod",defaultValue = "all-time") String timePeriod){
+        try{
+            Map<String,Object> status = adminService.getbookingStatistics(timePeriod);// Call the service to get statistics based on the timePeriod
+            return ResponseEntity.ok(status); // Return the statistics with HTTP 200 OK status
+        }catch (Exception e){
+            e.printStackTrace(); // Print the error in case something goes wrong
+            return ResponseEntity.status(500).body(null);  // Return HTTP 500 Internal Server Error with no body
+        }
+
+    }
+
+    @GetMapping("/financial-statistics")
+    public ResponseEntity<Map<String, Object>> getFinancialStatistics(
+            @RequestParam(value = "filter", required = false) String filter,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
 
         try {
-            Map<String, Object> stats = adminService.getbookingStatistics(timePeriod);
-            return ResponseEntity.ok(stats);
+            return ResponseEntity.ok(
+                    adminService.getFinancialStatistics(filter, startDate, endDate)
+            );
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(null);
@@ -73,31 +100,47 @@ public class AdminController {
     }
 
     @GetMapping("/overview")
-    public ResponseEntity<Map<String, Object>> getBookingOverview(
-            @RequestParam(value = "timePeriod", defaultValue = "all-time") String timePeriod) {
+    public ResponseEntity<Map<String, Object>> getbookingOverview(
+            @RequestParam(value = "filter", required = false) String filter,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
 
-        try {
-            Map<String, Object> overview = adminService.getOverview(timePeriod);
-            return ResponseEntity.ok(overview);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(null);
-        }
+        return ResponseEntity.ok(adminService.getOverview(filter, startDate, endDate));
     }
+
+
+    @GetMapping("/dashboard-overview")
+    public ResponseEntity<Map<String, Object>> getDashboardOverview() {
+        return ResponseEntity.ok(adminService.getOverview("all-time", null, null));
+    }
+
+
+
+
 
     @GetMapping("/today-bookings")
     public ResponseEntity<Long> getTodayBookings() {
-        return ResponseEntity.ok(adminService.getTodayBookings());
+        long count = adminService.getTodayBookings();
+        return ResponseEntity.ok(count);
     }
+
+
+    @GetMapping(value = "/todays-schedule", produces = "application/json")
+    public ResponseEntity<List<BookingDTO>> getTodaysBookings() {
+        return ResponseEntity.ok(bookingService.getTodaysBookings());
+    }
+
 
     @GetMapping("/pending-approvals")
     public ResponseEntity<Long> getPendingApprovals() {
-        return ResponseEntity.ok(adminService.getPendingApprovals());
+        long count = adminService.getPendingApprovals();
+        return ResponseEntity.ok(count);
     }
 
     @GetMapping("/recent-bookings")
     public ResponseEntity<List<Customer>> getRecentBookingsByDate() {
-        return ResponseEntity.ok(adminService.getRecentBookingsByDate());
+        List<Customer> recentBookings = adminService.getRecentBookingsByDate();
+        return ResponseEntity.ok(recentBookings);
     }
 
     @GetMapping("/visit-status")
@@ -110,25 +153,30 @@ public class AdminController {
         return adminService.updateVisitStatuses();
     }
 
+
     @GetMapping("/revenue-by-service")
-    public ResponseEntity<List<Map<String, Object>>> getRevenueByService() {
-        try {
-            return ResponseEntity.ok(adminService.getRevenueByService());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(null);
-        }
+    public ResponseEntity<List<Map<String, Object>>> getRevenueByService(
+            @RequestParam(value = "filter", required = false) String filter,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+
+        return ResponseEntity.ok(adminService.getRevenueByService(filter, startDate, endDate));
     }
 
-    // =======================
+
+
+// =======================
     // 📌 Top Customers & Services
     // =======================
 
+
+    //Top booking customers
     @GetMapping("/top-booked-customers")
     public ResponseEntity<List<CustomerDTO>> getTopBookedCustomers() {
         return ResponseEntity.ok(adminService.getTopBookedCustomers());
     }
 
+    //Top Services
     @GetMapping("/top-services")
     public ResponseEntity<Map<String, Object>> getTopServices() {
         Map<String, Object> response = new HashMap<>();
@@ -136,10 +184,16 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
+
+    // To fetch ratings
+
     @GetMapping("/top-rated-services")
     public ResponseEntity<List<ServiceDTO>> getTopRatedServices() {
         return ResponseEntity.ok(adminService.getTopRatedServices());
     }
+
+
+    //to fetch recent/ new bookings
 
     // =======================
     // 📌 Invoice & Reports
@@ -149,6 +203,7 @@ public class AdminController {
     public ResponseEntity<List<InvoiceDTO>> getAllInvoices() {
         List<InvoiceDTO> invoices = adminService.getAllInvoices();
 
+        // ✅ Filter only completed bookings
         List<InvoiceDTO> completedInvoices = invoices.stream()
                 .filter(invoice -> "completed".equalsIgnoreCase(invoice.getBookingStatus()))
                 .toList();
@@ -159,6 +214,8 @@ public class AdminController {
         return ResponseEntity.ok(completedInvoices);
     }
 
+
+    //financial management report
     @GetMapping(value = "/service-report/csv", produces = "text/csv")
     public void downloadServiceReportCsv(HttpServletResponse response) throws IOException {
         response.setContentType("text/csv");
@@ -166,6 +223,8 @@ public class AdminController {
 
         List<Map<String, Object>> reportData = adminService.getServiceReport();
         PrintWriter writer = response.getWriter();
+
+        // Header
         writer.println("Service Name,Total Revenue,Booking Count");
 
         for (Map<String, Object> row : reportData) {
@@ -177,19 +236,28 @@ public class AdminController {
         }
     }
 
-    @GetMapping("/category-bookings")
-    public ResponseEntity<List<Map<String, Object>>> getCategoryBookings(
-            @RequestParam(value = "category", required = false) String categoryFilter,
-            @RequestParam(value = "startDate", required = false) String startDate,
-            @RequestParam(value = "endDate", required = false) String endDate) {
-
+    // to get category wise graph
+    @GetMapping(value = "/category-wise-bookings", produces = "application/json")
+    public ResponseEntity<List<CategoryWiseBookingDTO>> getCategoryWiseBookings() {
         try {
-            List<Map<String, Object>> bookings =
-                    adminService.getCategoryBookings(categoryFilter, startDate, endDate);
-            return ResponseEntity.ok(bookings);
+            List<CategoryWiseBookingDTO> data = categoryWiseBookingService.getCategoryWiseBookings();
+
+            if (data == null || data.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+
+            return ResponseEntity.ok(data); // ✅ returns JSON array
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(null);
         }
     }
+
+    @GetMapping("/recent-activities")
+    public ResponseEntity<List<RecentActivityDTO>> getRecentActivities() {
+        return ResponseEntity.ok(adminService.getRecentActivities());
+    }
+
+
 }
+

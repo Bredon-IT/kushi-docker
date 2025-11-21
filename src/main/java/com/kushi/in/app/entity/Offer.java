@@ -11,7 +11,7 @@ public class Offer {
     private Long id;
 
     @Column(nullable = false)
-    private String text = "";   // safe default
+    private String text = "";
 
     @Column(name = "image_url")
     private String imageUrl;
@@ -20,26 +20,21 @@ public class Offer {
     private String color;
     private String emoji;
 
-    // Banner-specific fields
+    // banner-specific fields
     private String title;
     private String link;
 
-    // Constructors
+    // Constructors, getters, setters
     public Offer() {}
 
-    public Offer(String text, String imageUrl) {
-        this.text = (text == null ? "" : text);
-        this.imageUrl = imageUrl;
-    }
+    public Offer(String text, String imageUrl) { this.text = text; this.imageUrl = imageUrl; }
 
-    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
+
     public String getText() { return text; }
-    public void setText(String text) {
-        this.text = (text == null ? "" : text);
-    }
+    public void setText(String text) { this.text = (text == null ? "" : text); }
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
@@ -59,3 +54,4 @@ public class Offer {
     public String getLink() { return link; }
     public void setLink(String link) { this.link = link; }
 }
+

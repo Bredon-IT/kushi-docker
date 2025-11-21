@@ -44,7 +44,11 @@ public class BookingRequest {
     private Long service_id;
     private String cancellation_reason;
 
-    private String payment_method;
+    // ✅ ADDED FIELD: Inspection Status (e.g., "completed", "pending", "cancelled", "confirmed")
+    private String inspection_status;
+
+    private String paymentMethod;
+
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = true)
@@ -301,11 +305,22 @@ public class BookingRequest {
         this.site_visit = site_visit;
     }
 
-    public String getPayment_method() {
-        return payment_method;
+
+    public String getInspection_status() {
+        return inspection_status;
     }
 
-    public void setPayment_method(String payment_method) {
-        this.payment_method = payment_method;
+    public void setInspection_status(String inspection_status) {
+        this.inspection_status = inspection_status;
     }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+
 }

@@ -61,15 +61,12 @@ public class OfferController {
         offerService.deleteBanner(id);
     }
 
-    // ================== IMAGE UPLOAD (Offers & Banners Share Same Logic) ==================
+    // ================== IMAGE UPLOAD ==================
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-            if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body("File is empty!");
-            }
+            if (file.isEmpty()) return ResponseEntity.badRequest().body("File is empty!");
 
-            // Save to uploads folder
             String uploadDir = System.getProperty("user.dir") + File.separator + "uploads";
             File dir = new File(uploadDir);
             if (!dir.exists()) dir.mkdirs();
@@ -78,8 +75,8 @@ public class OfferController {
             File destFile = new File(dir, fileName);
             file.transferTo(destFile);
 
-            // FINAL CORRECT URL (Works for Production)
-            String fileUrl = "/uploads/" + fileName;
+            // Correct URL
+            String fileUrl = "https://main.dhtawzq4yzgjo.amplifyapp.com/uploads/" + fileName;
 
             return ResponseEntity.ok(fileUrl);
 
@@ -89,12 +86,11 @@ public class OfferController {
         }
     }
 
+    // ================== IMAGE UPLOAD (banners) ==================
     @PostMapping("/banners/upload")
     public ResponseEntity<?> uploadBannerImage(@RequestParam("file") MultipartFile file) {
         try {
-            if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body("File is empty!");
-            }
+            if (file.isEmpty()) return ResponseEntity.badRequest().body("File is empty!");
 
             String uploadDir = System.getProperty("user.dir") + File.separator + "uploads";
             File dir = new File(uploadDir);
@@ -104,8 +100,8 @@ public class OfferController {
             File destFile = new File(dir, fileName);
             file.transferTo(destFile);
 
-            // FINAL CORRECT URL
-            String fileUrl = "/uploads/" + fileName;
+            // Correct URL
+            String fileUrl = "https://main.dhtawzq4yzgjo.amplifyapp.com/uploads/" + fileName;
 
             return ResponseEntity.ok(fileUrl);
 
@@ -115,3 +111,4 @@ public class OfferController {
         }
     }
 }
+

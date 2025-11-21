@@ -17,14 +17,11 @@ public class NotificationServiceImpl implements NotificationService {
     private final SnsClient snsClient;
     private final SesClient sesClient;
 
-
-
-
     public NotificationServiceImpl(SnsClient snsClient, SesClient sesClient) {
         this.snsClient = snsClient;
         this.sesClient = sesClient;
-
     }
+
     /** 🔹 Convert phone to E.164 format (required by AWS SNS) */
     private String toE164(String phone) {
         if (phone == null) return null;
@@ -36,7 +33,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /** 🔹 Send SMS using AWS SNS */
-
     @Async
     public void sendNotification(String phone, String message) {
         try {
@@ -50,64 +46,61 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    /** 🔹 Send Email using AWS SES */
+    /** 🔹 Email Disabled Completely */
     private void sendEmail(String to, String subject, String text) {
-        try {
-            Destination destination = Destination.builder()
-                    .toAddresses(to)
-                    .build();
-
-            Message message = Message.builder()
-                    .subject(Content.builder().data(subject).build())
-                    .body(Body.builder().text(Content.builder().data(text).build()).build())
-                    .build();
-
-            SendEmailRequest emailRequest = SendEmailRequest.builder()
-                    .source("meenugalikhitha2002@gmail.com") // ✅ must be verified in SES
-                    .destination(destination)
-                    .message(message)
-                    .build();
-
-            sesClient.sendEmail(emailRequest);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // 🚫 EMAIL DISABLED – PRINTING ONLY
+        System.out.println("Email sending DISABLED → [" + subject + "] to " + to);
     }
 
-    /** 🔹 Booking Received (New) */
+    /** 🔹 Booking Received */
     @Async
     @Override
     public void sendBookingReceived(String email, String phone, String customer, String service, LocalDateTime date) {
-        sendEmail(email, "🎉 Booking Received - Kushi Services",
-                "Hello " + customer + ",\nYour booking for " + service + " on " + date + " has been successfully received. We will contact you shortly to confirm.");
-        sendNotification(phone, "Hi " + customer + ", your booking for " + service + " is received. We'll confirm shortly.");
+        sendEmail(email, "🎉 Booking Received",
+                "Hello " + customer + ", your booking for " + service + " is received.");
+
+        sendNotification(phone,
+                "Hi " + customer + ", your booking for " + service + " is received.");
+
+        System.out.println("sendBookingReceived() executed (EMAIL DISABLED)");
     }
 
     /** 🔹 Booking Confirmed */
     @Async
     @Override
     public void sendBookingConfirmation(String email, String phone, String customer, String service, LocalDateTime date) {
-        sendEmail(email, "✅ Booking Confirmed - Kushi Cleaning Services",
-                "Hello " + customer + ",\nYour booking for " + service + " on " + date + " has been confirmed.");
-        sendNotification(phone, "Hi " + customer + ", your booking for " + service + " on " + date + " is confirmed ✅");
+        sendEmail(email, "✅ Booking Confirmed",
+                "Hello " + customer + ", your booking for " + service + " is confirmed.");
+
+        sendNotification(phone,
+                "Hi " + customer + ", your booking for " + service + " is confirmed.");
+
+        System.out.println("sendBookingConfirmation() executed (EMAIL DISABLED)");
     }
 
     /** 🔹 Booking Declined */
     @Async
     @Override
     public void sendBookingDecline(String email, String phone, String customer, String service, LocalDateTime date) {
-        sendEmail(email, "❌ Booking Declined - Kushi Cleaning Services",
-                "Hello " + customer + ",\nSorry, your booking for " + service + " on " + date + " has been declined.");
-        sendNotification(phone, "Hi " + customer + ", your booking for " + service + " on " + date + " has been declined ❌");
+        sendEmail(email, "❌ Booking Declined",
+                "Hello " + customer + ", your booking for " + service + " is declined.");
+
+        sendNotification(phone,
+                "Hi " + customer + ", your booking for " + service + " is declined.");
+
+        System.out.println("sendBookingDecline() executed (EMAIL DISABLED)");
     }
 
     /** 🔹 Booking Completed */
     @Async
     @Override
     public void sendBookingCompleted(String email, String phone, String customer, String service, LocalDateTime date) {
-        sendEmail(email, "🎉 Booking Completed - Kushi Cleaning Services",
-                "Hello " + customer + ",\nYour booking for " + service + " on " + date + " is successfully completed.");
-        sendNotification(phone, "Hi " + customer + ", your booking for " + service + " is completed 🎉");
+        sendEmail(email, "🎉 Booking Completed",
+                "Hello " + customer + ", your booking for " + service + " is completed.");
+
+        sendNotification(phone,
+                "Hi " + customer + ", your booking for " + service + " is completed.");
+
+        System.out.println("sendBookingCompleted() executed (EMAIL DISABLED)");
     }
 }
-

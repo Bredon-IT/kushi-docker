@@ -3,6 +3,7 @@ package com.kushi.in.app.service;
 import com.kushi.in.app.entity.Customer;
 import com.kushi.in.app.model.CustomerDTO;
 import com.kushi.in.app.model.InvoiceDTO;
+import com.kushi.in.app.model.RecentActivityDTO;
 import com.kushi.in.app.model.ServiceDTO;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +16,11 @@ public interface AdminService {
     Customer saveBooking(Customer customer);
   ///assign worker
     void assignWorker(Long bookingId,String workerName);// Declares a method to assign a worker to a booking using its ID
-    Map<String, Object> getbookingStatistics(String timePeriod);
-    Map<String, Object> getOverview(String timePeriod);
+
     List<String> getVisitStatuses();
     List<String> updateVisitStatuses();
     List<Customer> getRecentBookingsByDate();
-    List<Map<String, Object>> getRevenueByService();
+
     long getTodayBookings();
     long getPendingApprovals();
     List<CustomerDTO> getTopBookedCustomers();
@@ -29,6 +29,15 @@ public interface AdminService {
     List<InvoiceDTO> getAllInvoices();
     List<Map<String, Object>> getServiceReport();
 
-    // ✅ Add this line for category bookings
-    List<Map<String, Object>> getCategoryBookings(String categoryFilter, String startDate, String endDate);
+
+  List<RecentActivityDTO> getRecentActivities();
+
+  List<Map<String, Object>> getRevenueByService(String filter, String startDate, String endDate);
+
+  Map<String, Object> getbookingStatistics(String timePeriod);
+
+
+  Map<String, Object> getOverview(String filter, String startDate, String endDate);
+
+  Map<String, Object> getFinancialStatistics(String filter, String startDate, String endDate);
 }

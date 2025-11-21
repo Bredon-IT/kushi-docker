@@ -2,27 +2,31 @@
 package com.kushi.in.app.service.impl;
 
 import com.kushi.in.app.dao.CustomerRepository;
+
 import com.kushi.in.app.dao.ServiceRepository;
 import com.kushi.in.app.entity.Customer;
 import com.kushi.in.app.entity.Services;
 import com.kushi.in.app.model.CustomerDTO;
 import com.kushi.in.app.service.CustomerService;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
-    private final CustomerRepository customerRepository;
+    @Autowired
+    private final CustomerRepository customerRepository; // lowercase 'c'
     private final ServiceRepository serviceRepository;
 
     public CustomerServiceImpl(CustomerRepository customerRepository, ServiceRepository serviceRepository) {
         this.customerRepository = customerRepository;
         this.serviceRepository = serviceRepository;
     }
+
 
     // ===========================
     // Customer Management
@@ -57,11 +61,13 @@ public class CustomerServiceImpl implements CustomerService {
             c.setZip_code(update.getZip_code());
             c.setBooking_service_name(update.getBooking_service_name());
             c.setBookingStatus(update.getBookingStatus());
-            c.setPayment_status(update.getPayment_status());
-            c.setPayment_method(update.getPayment_method());
+            c.setPaymentStatus(update.getPaymentStatus());
+            c.setPaymentMethod(update.getPaymentMethod());
             c.setRemarks(update.getRemarks());
             c.setSite_visit(update.getSite_visit());
+            c.setInspection_status(update.getInspection_status());
             return customerRepository.save(c);
+
         }).orElse(null);
     }
 
@@ -133,15 +139,20 @@ public class CustomerServiceImpl implements CustomerService {
         serviceRepository.deleteById(id);
     }
 
+
     @Override
     public Services updateService(Long id, Services services) {
         Services existing = serviceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Service not found with id " + id));
 
+        // Only update fields that are sent/valid
         if (services.getService_name() != null) existing.setService_name(services.getService_name());
         if (services.getService_type() != null) existing.setService_type(services.getService_type());
         if (services.getService_category() != null) existing.setService_category(services.getService_category());
+
+        // For double (primitive), only update if > 0 (or some other business logic)
         if (services.getService_cost() > 0) existing.setService_cost(services.getService_cost());
+
         if (services.getService_description() != null) existing.setService_description(services.getService_description());
         if (services.getService_details() != null) existing.setService_details(services.getService_details());
         if (services.getService_image_url() != null) existing.setService_image_url(services.getService_image_url());
@@ -153,6 +164,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (services.getUpdated_date() != null) existing.setUpdated_date(services.getUpdated_date());
         if (services.getService_package() != null) existing.setService_package(services.getService_package());
 
+        // Large text fields
         if (services.getOverview() != null) existing.setOverview(services.getOverview());
         if (services.getOur_process() != null) existing.setOur_process(services.getOur_process());
         if (services.getBenefits() != null) existing.setBenefits(services.getBenefits());
@@ -162,19 +174,20 @@ public class CustomerServiceImpl implements CustomerService {
 
         if (services.getKushi_teamwork() != null) existing.setKushi_teamwork(services.getKushi_teamwork());
         if (services.getFaq() != null) existing.setFaq(services.getFaq());
-
         return serviceRepository.save(existing);
     }
 
+
+
     // ===========================
-    // Helper Method
+    // Helper Methods
     // ===========================
 
     private CustomerDTO mapToDTO(Customer c) {
         return new CustomerDTO(
-                c.getBooking_id(),
-                c.getCustomer_id(),
-                c.getUser() != null ? c.getUser().getId() : null,
+                c.getBooking_id(),                        // Long -> Long
+                c.getCustomer_id(),                       // Integer -> Integer
+                c.getUser() != null ? c.getUser().getId() : null, // Long -> Long
                 c.getCustomer_name(),
                 c.getCustomer_email(),
                 c.getCustomer_number(),
@@ -185,23 +198,52 @@ public class CustomerServiceImpl implements CustomerService {
                 c.getBookingStatus(),
                 c.getBooking_time(),
                 c.getBooking_service_name(),
-                c.getGrand_total() != null ? c.getGrand_total() : c.getBooking_amount(),
+                c.getGrand_total() != null ? c.getGrand_total() : c.getBooking_amount(), // Use grand_total if discount applied
                 c.getDiscount(),
                 c.getGrand_total(),
-                c.getPayment_method(),
-                c.getPayment_status()
+                c.getPaymentMethod(),
+                c.getPaymentStatus(),
+                c.getInspection_status(),
+                c.getAddress_line_2(),
+                c.getAddress_line_3()
         );
     }
 
+
+
+    // Helper: ignore null fields when copying
+    private String[] getNullPropertyNames(Services source) {
+        return java.util.Arrays.stream(source.getClass().getDeclaredFields())
+                .filter(f -> {
+                    try {
+                        f.setAccessible(true);
+                        return f.get(source) == null;
+                    } catch (IllegalAccessException e) {
+                        return false;
+                    }
+                })
+                .map(f -> f.getName())
+                .toArray(String[]::new);
+    }
+
+
+
+
     @Override
     public String updateServiceStatus(Long id, String status) {
-        Optional<Services> opt = serviceRepository.findById(id);
-        if (opt.isPresent()) {
-            Services s = opt.get();
-            s.setActive(status.equalsIgnoreCase("Y") ? "Y" : "N");
-            serviceRepository.save(s);
+        Optional<Services> serviceOpt = serviceRepository.findById(id);
+        if (serviceOpt.isPresent()) {
+            Services service = serviceOpt.get();
+            // save Y = enabled, N = disabled
+            service.setActive(status.equals("Y") ? "Y" : "N");
+            serviceRepository.save(service);
             return "Success";
         }
         return "Failed";
     }
+
+
+
+
+
 }

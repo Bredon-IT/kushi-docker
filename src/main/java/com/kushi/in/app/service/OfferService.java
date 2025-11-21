@@ -24,7 +24,6 @@ public class OfferService {
         if (offer.getText() == null) offer.setText("");
         return offerRepository.save(offer);
     }
-
     public Offer updateOffer(Long id, Offer updatedOffer) {
         Optional<Offer> optional = offerRepository.findById(id);
         if (optional.isPresent()) {
@@ -47,14 +46,17 @@ public class OfferService {
     }
 
     // ================== BANNERS ==================
+    // Get banners (offers with only imageUrl or a separate isBanner field)
     public List<Offer> getAllBanners() {
+        // Example: banners are offers with non-null imageUrl
         return offerRepository.findAll().stream()
                 .filter(o -> o.getImageUrl() != null && (o.getText() == null || o.getText().isEmpty()))
                 .toList();
     }
 
     public Offer addBanner(Offer banner) {
-        banner.setText(""); // banners text always empty
+        // Ensure text is empty for banners
+        banner.setText("");
         return offerRepository.save(banner);
     }
 
@@ -65,7 +67,8 @@ public class OfferService {
             banner.setImageUrl(updatedBanner.getImageUrl());
             banner.setTitle(updatedBanner.getTitle());
             banner.setLink(updatedBanner.getLink());
-            banner.setText(""); // keep text empty for banners
+            // keep text empty
+            banner.setText("");
             return offerRepository.save(banner);
         } else {
             throw new RuntimeException("Banner not found with id " + id);
