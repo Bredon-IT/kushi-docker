@@ -14,11 +14,14 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOriginPatterns("*") // ✅ allow all origins
+                        .allowedOrigins(
+                            "https://main.dhtawzq4yzgjo.amplifyapp.com",
+                            "https://bredongroups.com"
+                        )
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .exposedHeaders("*")
-                        .allowCredentials(true); // allow cookies/auth headers
+                        .allowCredentials(true);
             }
         };
     }
