@@ -16,8 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(
-        origins = "https://main.dhtawzq4yzgjo.amplifyapp.com",  // Your React app URL
+@CrossOrigin(origins = {"https://main.dhtawzq4yzgjo.amplifyapp.com","https://bredongroups.com","https://kushiservices.com"},
         allowCredentials = "true"
 )
 
