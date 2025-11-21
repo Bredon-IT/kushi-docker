@@ -13,7 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/gallery")
-@CrossOrigin(origins ={ "https://main.dhtawzq4yzgjo.amplifyapp.com", "https://main.dhtawzq4yzgjo.amplifyapp.com"})
+@CrossOrigin(origins = {"https://main.dhtawzq4yzgjo.amplifyapp.com","https://bredongroups.com","https://kushiservices.com"})
 public class GalleryController {
 
     @Autowired
