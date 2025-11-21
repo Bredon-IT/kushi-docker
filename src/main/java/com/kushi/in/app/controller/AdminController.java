@@ -1,11 +1,12 @@
 package com.kushi.in.app.controller;
 
 
-import com.kushi.in.app.entity.Customer;
+import c
+om.kushi.in.app.entity.Customer;
 import com.kushi.in.app.model.*;
 import com.kushi.in.app.service.AdminService;
 import com.kushi.in.app.service.BookingService;
-import com.kushi.in.app.service.CategoryWiseBookingService;
+
 import com.kushi.in.app.service.CustomerService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
@@ -24,18 +25,18 @@ public class AdminController {
 
     private AdminService adminService;
     private final CustomerService customerService;
-    private CategoryWiseBookingService categoryWiseBookingService;
+
     private BookingService bookingService;
 
 
     // Constructor injection is preferred for better testability and immutability
     public AdminController(AdminService adminService,
                            CustomerService customerService,
-                           CategoryWiseBookingService categoryWiseBookingService,
+
                            BookingService bookingService) {
         this.adminService = adminService;
         this.customerService = customerService;
-        this.categoryWiseBookingService = categoryWiseBookingService;
+
         this.bookingService = bookingService;
     }
 
@@ -236,22 +237,7 @@ public class AdminController {
         }
     }
 
-    // to get category wise graph
-    @GetMapping(value = "/category-wise-bookings", produces = "application/json")
-    public ResponseEntity<List<CategoryWiseBookingDTO>> getCategoryWiseBookings() {
-        try {
-            List<CategoryWiseBookingDTO> data = categoryWiseBookingService.getCategoryWiseBookings();
 
-            if (data == null || data.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
-
-            return ResponseEntity.ok(data); // ✅ returns JSON array
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(null);
-        }
-    }
 
     @GetMapping("/recent-activities")
     public ResponseEntity<List<RecentActivityDTO>> getRecentActivities() {
@@ -261,3 +247,4 @@ public class AdminController {
 
 }
 
+ 
