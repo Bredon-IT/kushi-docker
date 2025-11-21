@@ -16,7 +16,8 @@ public class CorsConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                             "https://main.dhtawzq4yzgjo.amplifyapp.com",
-                            "https://bredongroups.com"
+                            "https://bredongroups.com",
+                            "https://kushiservices.com"
                         )
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
