@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/login")
-@CrossOrigin(origins = "https://main.dhtawzq4yzgjo.amplifyapp.com", allowCredentials = "true") // Allow from any frontend
+@CrossOrigin(origins = {"https://main.dhtawzq4yzgjo.amplifyapp.com","https://bredongroups.com","https://kushiservices.com"},allowCredentials = "true") // Allow from any frontend
 public class LoginController {
 
     @Autowired
