@@ -15,7 +15,7 @@ import static com.kushi.in.app.config.AppConstants.*;
 
 @RestController
 @RequestMapping("/api/offers")
-@CrossOrigin(origins = {AMPLIFY_DEV_URL}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
+@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
 public class OfferController {
 
     @Autowired

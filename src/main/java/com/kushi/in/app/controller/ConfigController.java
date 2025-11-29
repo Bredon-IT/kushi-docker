@@ -24,7 +24,7 @@ public class ConfigController {
     @Autowired(required = false)
     private AwsSecretsManagerService secretsManagerService;
 
-    @Value("${razorpay.key.id:rzp_test_XXXXXXXXXXXX}")
+    @Value("${razorpay.key.id:rzp_live_RlYEJdBbbNn4Wq}")
     private String razorpayKeyId;
 
     /**

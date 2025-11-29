@@ -17,10 +17,9 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                            AMPLIFY_DEV_URL
-                            // AMPLIFY_APP_URL,
-                            // BREDON_GROUPS_URL,
-                            // KUSHI_SERVICES_URL
+                             "https://kushiservices.com",
+                             "https://www.kushiservices.com"
+
                         )
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                         .allowedHeaders("*")

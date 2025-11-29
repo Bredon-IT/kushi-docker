@@ -17,10 +17,10 @@ import org.json.JSONObject;
 @Service
 public class RazorpayService {
 
-    @Value("${razorpay.key.id:rzp_test_XXXXXXXXXXXX}")
+    @Value("${razorpay.key.id:rzp_live_RlYEJdBbbNn4Wq}")
     private String keyId;
 
-    @Value("${razorpay.key.secret:your_secret_key_here}")
+    @Value("${razorpay.key.secret:jsQ0DZtrwxVZ8RWlrrZdlymJ}")
     private String keySecret;
 
     private static final String RAZORPAY_API_URL = "https://api.razorpay.com/v1";
