@@ -17,9 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.kushi.in.app.config.AppConstants.*;
+
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"}) // Update with actual frontend URL for production
+@CrossOrigin(origins = {AMPLIFY_DEV_URL}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL}) // Update with actual frontend URL for production
 public class AdminController {
 
     private AdminService adminService;

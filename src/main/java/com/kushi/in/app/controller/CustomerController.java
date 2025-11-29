@@ -20,11 +20,12 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+import static com.kushi.in.app.config.AppConstants.*;
 
 @RestController
 
 @RequestMapping("/api/customers")
-@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"})
+@CrossOrigin(origins = {AMPLIFY_DEV_URL}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -96,6 +97,17 @@ public class CustomerController {
     @GetMapping("/completed")
     public List<CustomerDTO> getCompletedBookings() {
         return customerService.getCompletedBookings();
+    }
+
+    // Get bookings by email (for checking Razorpay payment data)
+    @GetMapping("/by-email/{email}")
+    public ResponseEntity<List<Customer>> getBookingsByEmail(@PathVariable String email) {
+        try {
+            List<Customer> bookings = customerService.getBookingsByEmail(email);
+            return ResponseEntity.ok(bookings);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
     // ===========================

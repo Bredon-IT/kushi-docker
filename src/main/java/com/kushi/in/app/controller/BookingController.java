@@ -12,9 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.kushi.in.app.config.AppConstants.*;
+
 @RestController
 @RequestMapping("/api/bookings")
-@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"})
+@CrossOrigin(origins = {AMPLIFY_DEV_URL}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
 
  // frontend React dev server
 public class BookingController {
