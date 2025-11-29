@@ -3,7 +3,7 @@ name: Build & Deploy to AWS ECR + AppRunner
 on:
   # Trigger this workflow when code is pushed to main branch
   push:
-    branches: ["dev"]
+    branches: ["main"]
 
 jobs:
   build-deploy:
@@ -45,20 +45,20 @@ jobs:
           echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" >> $GITHUB_ENV
 
       # Step 5: Deploy the new image to AWS App Runner
-      - name: Deploy to AWS App Runner (kushi-backend-dev)
+      - name: Deploy to AWS App Runner (kushi-backend)
         run: |
-          echo "Fetching AppRunner Service ARN for kushi-backend-dev..."
+          echo "Fetching AppRunner Service ARN for kushi-backend..."
 
           # Get the ARN of your App Runner service
           SERVICE_ARN=$(aws apprunner list-services \
-            --query "ServiceSummaryList[?ServiceName=='kushi-backend-dev'].ServiceArn" \
+            --query "ServiceSummaryList[?ServiceName=='kushi-backend'].ServiceArn" \
             --output text)
 
           echo "Service ARN: $SERVICE_ARN"
 
           # If service not found, fail pipeline
           if [ -z "$SERVICE_ARN" ]; then
-            echo "ERROR: App Runner service 'kushi-backend-dev' not found!"
+            echo "ERROR: App Runner service 'kushi-backend' not found!"
             exit 1
           fi
 
