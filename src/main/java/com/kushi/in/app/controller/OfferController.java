@@ -11,9 +11,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static com.kushi.in.app.config.AppConstants.*;
+
 @RestController
 @RequestMapping("/api/offers")
-@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"})
+@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
 public class OfferController {
 
     @Autowired

@@ -73,7 +73,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
 
     List<Customer> findAllByRatingIsNotNullAndFeedbackIsNotNull();
-
+    
+    @Query("SELECT c FROM Customer c WHERE c.customer_email = :email ORDER BY c.booking_id DESC")
+    List<Customer> findByCustomerEmailOrderByBookingIdDesc(@Param("email") String email);
 
 
 

@@ -8,8 +8,6 @@ import com.kushi.in.app.service.BookingService;
 import com.kushi.in.app.service.NotificationService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,9 +18,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingService {
-
-    @Autowired
-    private JavaMailSender mailSender;
 
     private final BookingRepository bookingRepository;
     private final CustomerRepository customerRepository;
@@ -64,6 +59,11 @@ public class BookingServiceImpl implements BookingService {
         booking.setPaymentStatus(
                 request.getPaymentStatus() != null ? request.getPaymentStatus() : "Unpaid"
         );
+        // Razorpay Payment Fields
+        booking.setRazorpay_order_id(request.getRazorpay_order_id());
+        booking.setRazorpay_payment_id(request.getRazorpay_payment_id());
+        booking.setRazorpay_signature(request.getRazorpay_signature());
+        
         // Parse bookingDate
         if (request.getBookingDate() != null && !request.getBookingDate().isEmpty()) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
