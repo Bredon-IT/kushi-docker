@@ -32,7 +32,8 @@ public interface CustomerService {
     List<CustomerDTO> getLoggedInCustomers();
     List<CustomerDTO> getGuestCustomers();
     List<CustomerDTO> getCompletedBookings();
-
+    
+    List<Customer> getBookingsByEmail(String email);
 
 
 

@@ -87,6 +87,16 @@ public class Customer {
     @Column(columnDefinition = "LONGTEXT")
     private String cancellation_reason;
 
+    // Razorpay Payment Fields
+    @Column(name = "razorpay_order_id")
+    private String razorpay_order_id;
+
+    @Column(name = "razorpay_payment_id")
+    private String razorpay_payment_id;
+
+    @Column(name = "razorpay_signature")
+    private String razorpay_signature;
+
     public Double getDiscount() {
         return discount;
     }

@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.kushi.in.app.config.AppConstants.*;
+
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"},
+@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"}, // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL},
         allowCredentials = "true"
 )
 

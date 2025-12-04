@@ -52,20 +52,60 @@ public class AdminServiceImpl implements AdminService {
         return adminRepository.save(customer);
     }
 
+
     // Assigns a worker to an existing booking based on the booking ID
     @Override
     public void assignWorker(Long bookingId, String workerName) {
         Customer booking = adminRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        String existing = booking.getWorker_assign(); // assume it's a comma-separated string
-        if (existing == null || existing.trim().isEmpty()) {
-            booking.setWorker_assign(workerName);
-        } else {
-            booking.setWorker_assign(existing + "," + workerName);
+        String existing = booking.getWorker_assign();
+
+        List<String> workers = new ArrayList<>();
+        if (existing != null && !existing.trim().isEmpty()) {
+            workers = Arrays.stream(existing.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
         }
 
-        adminRepository.save(booking); // this **persists in DB**
+        // Prevent duplicates
+        if (!workers.contains(workerName.trim())) {
+            workers.add(workerName.trim());
+        }
+
+        // Save cleaned list back
+        booking.setWorker_assign(String.join(", ", workers));
+
+        adminRepository.save(booking);
+    }
+
+
+
+    @Override
+    public void removeWorker(Long bookingId, String workerName) {
+
+        Customer booking = adminRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        String existing = booking.getWorker_assign();
+
+        if (existing == null || existing.trim().isEmpty()) {
+            return; // nothing to remove
+        }
+
+        // Split, remove, and rebuild comma-separated list
+        List<String> workers = Arrays.stream(existing.split(","))
+                .map(String::trim)
+                .filter(w -> !w.equalsIgnoreCase(workerName))  // REMOVE MATCHING WORKER
+                .collect(Collectors.toList());
+
+        // Update DB string
+        booking.setWorker_assign(
+                workers.isEmpty() ? null : String.join(",", workers)
+        );
+
+        adminRepository.save(booking);
     }
 
 
