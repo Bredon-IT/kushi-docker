@@ -40,4 +40,6 @@ public interface AdminService {
   Map<String, Object> getOverview(String filter, String startDate, String endDate);
 
   Map<String, Object> getFinancialStatistics(String filter, String startDate, String endDate);
+
+  void removeWorker(Long bookingId, String workername);
 }
