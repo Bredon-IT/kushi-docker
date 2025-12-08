@@ -75,11 +75,11 @@ jobs:
 
       # Step 5: Deploy the new image to AWS App Runner
 
-      - name: Deploy to AWS App Runner (kushi-backend-new)
+      - name: Deploy to AWS App Runner (kushi-backend-dev)
 
         run: |
 
-          echo "Fetching AppRunner Service ARN for kushi-backend..."
+          echo "Fetching AppRunner Service ARN for kushi-backend-dev..."
           
           # Get the ARN of your App Runner service
 
@@ -95,7 +95,7 @@ jobs:
 
           if [ -z "$SERVICE_ARN" ]; then
 
-            echo "ERROR: App Runner service 'kushi-backend' not found!"
+            echo "ERROR: App Runner service 'kushi-backend-dev' not found!"
 
             exit 1
 
