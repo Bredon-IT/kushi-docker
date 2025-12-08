@@ -21,7 +21,7 @@ import static com.kushi.in.app.config.AppConstants.*;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL}) // Update with actual frontend URL for production
+@CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL}) // Update with actual frontend URL for production
 public class AdminController {
 
     private AdminService adminService;
@@ -65,6 +65,19 @@ public class AdminController {
         adminService.assignWorker(bookingId, workername);
         return ResponseEntity.ok("Worker assigned successfully");
     }
+
+    // REMOVE worker from booking
+    @PutMapping("/{id}/remove-worker")
+    public ResponseEntity<String> removeWorker(
+            @PathVariable("id") Long bookingId,
+            @RequestBody Map<String, String> body) {
+
+        String workername = body.get("workername");
+        adminService.removeWorker(bookingId, workername);
+
+        return ResponseEntity.ok("Worker removed successfully");
+    }
+
 
 
     // =======================
@@ -248,4 +261,3 @@ public class AdminController {
 
 }
 
- 

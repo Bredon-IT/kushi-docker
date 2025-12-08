@@ -32,6 +32,14 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
         }
+        // 2. Check if phone number already exists
+        if (userRepository.existsByPhone(request.getPhone())) {
+            // Specific message for client to handle
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Phone number already registered"
+            );
+        }
 
         User user = new User();
         user.setFirstName(request.getFirstName());
