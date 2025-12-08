@@ -113,7 +113,7 @@ public class AwsSecretsManagerService {
     }
 
     public String getDatabaseUrl() {
-        return getBackendSecret("DB_URL");
+        return getBackendSecret("DB_URL_Dev");
     }
 
     public String getDatabaseUsername() {

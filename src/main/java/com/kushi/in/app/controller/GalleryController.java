@@ -15,7 +15,7 @@ import static com.kushi.in.app.config.AppConstants.*;
 
 @RestController
 @RequestMapping("/api/gallery")
-@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
+@CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
 public class GalleryController {
 
     @Autowired

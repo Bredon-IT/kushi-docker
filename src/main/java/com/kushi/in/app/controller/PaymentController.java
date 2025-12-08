@@ -13,7 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payment")
-@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"})
+@CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"})
 public class PaymentController {
 
     @Autowired

@@ -17,8 +17,8 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                             "https://kushiservices.com",
-                             "https://www.kushiservices.com"
+                             "https://dev.dhtawzq4yzgjo.amplifyapp.com/"
+
 
                         )
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
