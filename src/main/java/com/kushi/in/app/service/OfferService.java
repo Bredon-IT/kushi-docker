@@ -14,68 +14,48 @@ public class OfferService {
     @Autowired
     private OfferRepository offerRepository;
 
-    // ================== OFFERS ==================
+    // ================== GET ALL OFFERS ==================
     public List<Offer> getAllOffers() {
         return offerRepository.findAll();
     }
 
+    // ================== ADD OFFER ==================
     public Offer addOffer(Offer offer) {
-        // ensure text not null
+
         if (offer.getText() == null) offer.setText("");
+        if (offer.getFontFamily() == null) offer.setFontFamily("Arial");
+        if (offer.getColor() == null) offer.setColor("#000000");
+        if (offer.getEmoji() == null) offer.setEmoji("");
+        if (offer.getImageUrl() == null) offer.setImageUrl("");
+
         return offerRepository.save(offer);
     }
+
+    // ================== UPDATE OFFER ==================
     public Offer updateOffer(Long id, Offer updatedOffer) {
+
         Optional<Offer> optional = offerRepository.findById(id);
-        if (optional.isPresent()) {
-            Offer offer = optional.get();
-            offer.setText(updatedOffer.getText());
+        if (optional.isEmpty()) {
+            throw new RuntimeException("Offer not found with id: " + id);
+        }
+
+        Offer offer = optional.get();
+
+        offer.setText(updatedOffer.getText() != null ? updatedOffer.getText() : "");
+        offer.setFontFamily(updatedOffer.getFontFamily() != null ? updatedOffer.getFontFamily() : "Arial");
+        offer.setColor(updatedOffer.getColor() != null ? updatedOffer.getColor() : "#000000");
+        offer.setEmoji(updatedOffer.getEmoji() != null ? updatedOffer.getEmoji() : "");
+
+        // Only update image if user sent a new one
+        if (updatedOffer.getImageUrl() != null && !updatedOffer.getImageUrl().trim().isEmpty()) {
             offer.setImageUrl(updatedOffer.getImageUrl());
-            offer.setFontFamily(updatedOffer.getFontFamily());
-            offer.setColor(updatedOffer.getColor());
-            offer.setEmoji(updatedOffer.getEmoji());
-            offer.setTitle(updatedOffer.getTitle());
-            offer.setLink(updatedOffer.getLink());
-            return offerRepository.save(offer);
-        } else {
-            throw new RuntimeException("Offer not found with id " + id);
         }
+
+        return offerRepository.save(offer);
     }
 
+    // ================== DELETE OFFER ==================
     public void deleteOffer(Long id) {
-        offerRepository.deleteById(id);
-    }
-
-    // ================== BANNERS ==================
-    // Get banners (offers with only imageUrl or a separate isBanner field)
-    public List<Offer> getAllBanners() {
-        // Example: banners are offers with non-null imageUrl
-        return offerRepository.findAll().stream()
-                .filter(o -> o.getImageUrl() != null && (o.getText() == null || o.getText().isEmpty()))
-                .toList();
-    }
-
-    public Offer addBanner(Offer banner) {
-        // Ensure text is empty for banners
-        banner.setText("");
-        return offerRepository.save(banner);
-    }
-
-    public Offer updateBanner(Long id, Offer updatedBanner) {
-        Optional<Offer> optional = offerRepository.findById(id);
-        if (optional.isPresent()) {
-            Offer banner = optional.get();
-            banner.setImageUrl(updatedBanner.getImageUrl());
-            banner.setTitle(updatedBanner.getTitle());
-            banner.setLink(updatedBanner.getLink());
-            // keep text empty
-            banner.setText("");
-            return offerRepository.save(banner);
-        } else {
-            throw new RuntimeException("Banner not found with id " + id);
-        }
-    }
-
-    public void deleteBanner(Long id) {
         offerRepository.deleteById(id);
     }
 }
