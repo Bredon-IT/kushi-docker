@@ -65,6 +65,18 @@ public class AdminController {
         adminService.assignWorker(bookingId, workername);
         return ResponseEntity.ok("Worker assigned successfully");
     }
+    
+ // REMOVE worker from booking
+    @PutMapping("/{id}/remove-worker")
+    public ResponseEntity<String> removeWorker(
+            @PathVariable("id") Long bookingId,
+            @RequestBody Map<String, String> body) {
+
+        String workername = body.get("workername");
+        adminService.removeWorker(bookingId, workername);
+
+        return ResponseEntity.ok("Worker removed successfully");
+    }
 
     // REMOVE worker from booking
     @PutMapping("/{id}/remove-worker")

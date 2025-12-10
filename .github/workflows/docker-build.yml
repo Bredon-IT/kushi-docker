@@ -46,20 +46,20 @@ jobs:
           echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" >> $GITHUB_ENV
 
       # Step 5: Deploy the new image to AWS App Runner
-      - name: Deploy to AWS App Runner (kushi-backend)
+      - name: Deploy to AWS App Runner (kush-prod)
         run: |
-          echo "Fetching AppRunner Service ARN for kushi-backend..."
+          echo "Fetching AppRunner Service ARN for kush-prod..."
 
           # Get the ARN of your App Runner service
           SERVICE_ARN=$(aws apprunner list-services \
-            --query "ServiceSummaryList[?ServiceName=='kushi-backend'].ServiceArn" \
+            --query "ServiceSummaryList[?ServiceName=='kush-prod'].ServiceArn" \
             --output text)
 
           echo "Service ARN: $SERVICE_ARN"
 
           # If service not found, fail pipeline
           if [ -z "$SERVICE_ARN" ]; then
-            echo "ERROR: App Runner service 'kushi-backend' not found!"
+            echo "ERROR: App Runner service 'kush-prod' not found!"
             exit 1
           fi
 
