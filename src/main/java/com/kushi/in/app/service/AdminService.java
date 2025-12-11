@@ -1,10 +1,7 @@
 package com.kushi.in.app.service;
 
 import com.kushi.in.app.entity.Customer;
-import com.kushi.in.app.model.CustomerDTO;
-import com.kushi.in.app.model.InvoiceDTO;
-import com.kushi.in.app.model.RecentActivityDTO;
-import com.kushi.in.app.model.ServiceDTO;
+import com.kushi.in.app.model.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,4 +39,6 @@ public interface AdminService {
   Map<String, Object> getFinancialStatistics(String filter, String startDate, String endDate);
 
   void removeWorker(Long bookingId, String workername);
+
+    List<BookingDTO> getTodaysBookings();
 }

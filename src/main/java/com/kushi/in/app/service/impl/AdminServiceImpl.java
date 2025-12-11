@@ -7,21 +7,19 @@ import com.kushi.in.app.dao.AdminRepository;
 import com.kushi.in.app.dao.CustomerRepository;
 import com.kushi.in.app.entity.Customer;
 import com.kushi.in.app.entity.Services;
-import com.kushi.in.app.model.CustomerDTO;
-import com.kushi.in.app.model.InvoiceDTO;
-import com.kushi.in.app.model.RecentActivityDTO;
-import com.kushi.in.app.model.ServiceDTO;
+import com.kushi.in.app.model.*;
 import com.kushi.in.app.service.AdminService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -617,16 +615,71 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public List<RecentActivityDTO> getRecentActivities() {
-        return adminRepository.getRecentActivities().stream().map(c -> {
-            RecentActivityDTO dto = new RecentActivityDTO();
-            dto.setBooking_id(c.getBooking_id());
-            dto.setCustomer_name(c.getCustomer_name());
-            dto.setBookingStatus(c.getBookingStatus());
-            dto.setBooking_service_name(c.getBooking_service_name());
-            dto.setBookingDate(c.getBookingDate());
-            return dto;
-        }).collect(Collectors.toList());
+        LocalDate today = LocalDate.now();
+
+        return adminRepository.getRecentActivities().stream()
+                .filter(c -> c.getBookingDate() != null
+                        && c.getBookingDate().toLocalDate().isEqual(today))
+                .sorted(Comparator.comparing(Customer::getBookingDate).reversed()) // latest first
+                .map(c -> {
+                    RecentActivityDTO dto = new RecentActivityDTO();
+
+                    dto.setBooking_id(c.getBooking_id());
+                    dto.setCustomer_name(c.getCustomer_name());
+                    dto.setBooking_service_name(c.getBooking_service_name());
+                    dto.setBookingStatus(c.getBookingStatus());
+                    dto.setBookingDate(c.getBookingDate());
+
+                    // ⭐ Professional Message
+                    dto.setMessage(
+                            "Booking of " + c.getCustomer_name() +
+                                    " has been updated to " + c.getBookingStatus() + "."
+                    );
+
+                    // ⭐ Format Timestamp
+                    dto.setFormattedTime(
+                            c.getBookingDate().format(
+                                    DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")
+                            )
+                    );
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
+
+
+
+    @Override
+    public List<BookingDTO> getTodaysBookings() {
+        LocalDate today = LocalDate.now();
+
+        return adminRepository.findAll().stream()
+                .filter(b -> b.getBookingDate() != null)
+                .filter(b -> b.getBookingDate().toLocalDate().isEqual(today))
+                .filter(b -> !b.getBookingStatus().equalsIgnoreCase("completed"))
+                .sorted(Comparator.comparing(Customer::getBookingDate)) // correct ordering
+                .map(c -> {
+                    BookingDTO dto = new BookingDTO();
+
+                    dto.setBooking_id(c.getBooking_id());
+                    dto.setCustomer_name(c.getCustomer_name());
+                    dto.setBooking_service_name(c.getBooking_service_name());
+                    dto.setAddress_line_1(c.getAddress_line_1());
+
+                    // ⭐ Send full datetime string
+                    dto.setBooking_date(
+                            c.getBookingDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    );
+
+                    dto.setBooking_time(null); // remove this field
+                    dto.setBookingStatus(c.getBookingStatus());
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
 
 
 }

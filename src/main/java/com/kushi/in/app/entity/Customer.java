@@ -132,6 +132,12 @@ public class Customer {
     @Column(name = "inspection_status")
     private String inspectionStatus;
 
+    @Column(name = "status_reason", columnDefinition = "LONGTEXT")
+    private String statusReason;
+
+
+
+
     public String getInspection_status() {
         return inspectionStatus;
     }
@@ -426,5 +432,37 @@ public class Customer {
 
     public void setCancellation_reason(String cancellation_reason) {
         this.cancellation_reason = cancellation_reason;
+    }
+
+    public String getRazorpay_order_id() {
+        return razorpay_order_id;
+    }
+
+    public void setRazorpay_order_id(String razorpay_order_id) {
+        this.razorpay_order_id = razorpay_order_id;
+    }
+
+    public String getRazorpay_payment_id() {
+        return razorpay_payment_id;
+    }
+
+    public void setRazorpay_payment_id(String razorpay_payment_id) {
+        this.razorpay_payment_id = razorpay_payment_id;
+    }
+
+    public String getRazorpay_signature() {
+        return razorpay_signature;
+    }
+
+    public void setRazorpay_signature(String razorpay_signature) {
+        this.razorpay_signature = razorpay_signature;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 }
