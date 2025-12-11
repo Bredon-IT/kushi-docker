@@ -18,6 +18,7 @@ import static com.kushi.in.app.config.AppConstants.*;
 @RequestMapping("/api/bookings")
 @CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
 
+
  // frontend React dev server
 public class BookingController {
 
@@ -54,14 +55,17 @@ public class BookingController {
         try {
             String status = body.get("status");
             String canceledBy = body.get("canceledBy");
-            String cancellationReason = body.get("cancellationReason"); // ← NEW
-            Customer updated = bookingService.updateBookingStatus(id, status, canceledBy, cancellationReason);
+            String reason = body.get("reason"); // UNIVERSAL reason
+
+            Customer updated = bookingService.updateBookingStatus(id, status, canceledBy, reason);
             return ResponseEntity.ok(updated);
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Failed to update status: " + e.getMessage());
         }
     }
+
 
 
     // ✅ Send Booking Notification
@@ -184,6 +188,35 @@ public class BookingController {
     }
 
 
+    // ⭐ ADMIN: Create booking from admin dashboard
+    @PostMapping("/admin/create")
+    public ResponseEntity<?> createBookingFromAdmin(@RequestBody AdminBookingCreateRequest req) {
+        try {
+            return ResponseEntity.ok(bookingService.adminCreateBooking(req));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to create booking: " + e.getMessage());
+        }
+    }
+
+
+    @PutMapping("/{bookingId}/payment-method")
+    public ResponseEntity<?> updatePaymentMethod(
+            @PathVariable("bookingId") Long bookingId,
+            @RequestBody Map<String, String> body) {
+
+        try {
+            String paymentMethod = body.get("paymentMethod");
+
+            Customer updated = bookingService.updatePaymentMethod(bookingId, paymentMethod);
+
+            return ResponseEntity.ok(updated);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to update payment method: " + e.getMessage());
+        }
+    }
 
 
 }
