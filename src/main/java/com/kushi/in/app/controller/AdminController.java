@@ -21,9 +21,9 @@ import static com.kushi.in.app.config.AppConstants.*;
 
 @RestController
 @RequestMapping("/api/admin")
-//@CrossOrigin(origins = {"http://localhost:5173"})
- @CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL}) // Update with actual frontend URL for production
+@CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL}) // Update with actual frontend URL for production
 public class AdminController {
+
 
     private AdminService adminService;
     private final CustomerService customerService;

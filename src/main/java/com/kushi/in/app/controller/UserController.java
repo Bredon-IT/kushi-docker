@@ -18,7 +18,6 @@ import static com.kushi.in.app.config.AppConstants.*;
 
 @RestController
 @RequestMapping("/api/auth")
-//@CrossOrigin(origins = {"http://localhost:5173"})
 @CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"}, // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL},
         allowCredentials = "true"
 )
