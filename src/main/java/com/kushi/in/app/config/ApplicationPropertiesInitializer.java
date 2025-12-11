@@ -73,7 +73,7 @@ public class ApplicationPropertiesInitializer implements ApplicationContextIniti
             // Map AWS Secrets Manager keys to application.properties keys
             mapSecret(properties, jsonNode, "RAZORPAY_KEY_ID", "razorpay.key.id");
             mapSecret(properties, jsonNode, "RAZORPAY_KEY_SECRET", "razorpay.key.secret");
-            mapSecret(properties, jsonNode, "DB_URL", "spring.datasource.url");
+            mapSecret(properties, jsonNode, "DB_URL_dev", "spring.datasource.url");
             mapSecret(properties, jsonNode, "DB_USERNAME", "spring.datasource.username");
             mapSecret(properties, jsonNode, "DB_PASSWORD", "spring.datasource.password");
             mapSecret(properties, jsonNode, "AWS_ACCESS_KEY", "cloud.aws.credentials.access-key");
