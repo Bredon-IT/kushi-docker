@@ -4,11 +4,20 @@ package com.kushi.in.app.service;
 import com.kushi.in.app.entity.Customer;
 import com.kushi.in.app.model.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public interface BookingService {
+
+
+
+
+
+
+
+
     Customer createBooking(BookingRequest request);
 
     List<BookingDTO> getAllBookings();
@@ -42,4 +51,8 @@ public interface BookingService {
 
     Customer updatePaymentStatus(Long bookingId, String paymentStatus);
 
+    Customer adminCreateBooking(AdminBookingCreateRequest req);
+
+
+    Customer updatePaymentMethod(Long bookingId, String paymentMethod);
 }
