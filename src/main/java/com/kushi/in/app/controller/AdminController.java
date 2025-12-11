@@ -24,6 +24,7 @@ import static com.kushi.in.app.config.AppConstants.*;
 @CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL}) // Update with actual frontend URL for production
 public class AdminController {
 
+
     private AdminService adminService;
     private final CustomerService customerService;
 

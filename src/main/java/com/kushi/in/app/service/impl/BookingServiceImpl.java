@@ -30,6 +30,11 @@ public class BookingServiceImpl implements BookingService {
         this.notificationService = notificationService;
         this.customerRepository = customerRepository;
     }
+    private String convertTo24Hr(String time) {
+        DateTimeFormatter inFmt = DateTimeFormatter.ofPattern("hh:mm a");
+        DateTimeFormatter outFmt = DateTimeFormatter.ofPattern("HH:mm");
+        return outFmt.format(inFmt.parse(time));
+    }
 
     @Override
 
@@ -49,6 +54,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setTotalAmount(request.getTotalAmount());
         booking.setBooking_service_name(request.getBookingServiceName());
         booking.setRemarks(request.getRemarks());
+        booking.setStatusReason(request.getStatusReason());
         booking.setBookingStatus(request.getBookingStatus() != null ? request.getBookingStatus() : "Pending");
          booking.setCreated_by(request.getCreatedBy() != null ? request.getCreatedBy() : "Customer");
         booking.setCreated_date(LocalDateTime.now().toString());
@@ -114,7 +120,7 @@ public class BookingServiceImpl implements BookingService {
             dto.setGrand_total(c.getGrand_total());
             dto.setCancellation_reason(c.getCancellation_reason());
             dto.setPaymentMethod(c.getPaymentMethod());
-
+            dto.setStatusReason(c.getStatusReason());
             dto.setSite_visit(c.getSite_visit());
             dto.setAddress(c.getAddress_line_1());
             // FIX: Convert comma-separated String to List<String>
@@ -128,50 +134,68 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Customer updateBookingStatus(Long bookingId, String status, String canceledBy, String cancellationReason) {
+    public Customer updateBookingStatus(Long bookingId, String status, String canceledBy, String reason) {
+
         Customer customer = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
         customer.setBookingStatus(status != null ? status.toLowerCase() : "pending");
 
+        // Save UNIVERSAL status reason
+        if (reason != null && !reason.trim().isEmpty()) {
+            customer.setStatusReason(reason);
+        }
+
+        // Cancellation-specific logic
         if ("cancelled".equalsIgnoreCase(status)) {
             customer.setCanceledBy(canceledBy);
-            customer.setCancellation_reason(cancellationReason); // ← SAVE reason
+            customer.setCancellation_reason(reason);
         }
+
         bookingRepository.save(customer);
 
         try {
-            if ("confirmed".equalsIgnoreCase(status)) {
-                notificationService.sendBookingConfirmation(
-                        customer.getCustomer_email(),
-                        customer.getCustomer_number(),
-                        customer.getCustomer_name(),
-                        customer.getBooking_service_name(),
-                        customer.getBookingDate());
+            switch (status.toLowerCase()) {
+                case "confirmed":
+                    notificationService.sendBookingConfirmation(
+                            customer.getCustomer_email(),
+                            customer.getCustomer_number(),
+                            customer.getCustomer_name(),
+                            customer.getBooking_service_name(),
+                            customer.getBookingDate()
+                    );
+                    break;
 
-            } else if ("cancelled".equalsIgnoreCase(status)) {
-                notificationService.sendBookingDecline(
-                        customer.getCustomer_email(),
-                        customer.getCustomer_number(),
-                        customer.getCustomer_name(),
-                        customer.getBooking_service_name(),
-                        customer.getBookingDate());
-                        customer.getCancellation_reason();
+                case "cancelled":
+                    notificationService.sendBookingDecline(
+                            customer.getCustomer_email(),
+                            customer.getCustomer_number(),
+                            customer.getCustomer_name(),
+                            customer.getBooking_service_name(),
+                            customer.getBookingDate()
+                    );
+                    break;
 
-            } else if ("completed".equalsIgnoreCase(status)) {
-                notificationService.sendBookingCompleted(
-                        customer.getCustomer_email(),
-                        customer.getCustomer_number(),
-                        customer.getCustomer_name(),
-                        customer.getBooking_service_name(),
-                        customer.getBookingDate());
+                case "completed":
+                    notificationService.sendBookingCompleted(
+                            customer.getCustomer_email(),
+                            customer.getCustomer_number(),
+                            customer.getCustomer_name(),
+                            customer.getBooking_service_name(),
+                            customer.getBookingDate()
+                    );
+                    break;
 
+                default:
+                    break;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return customer;
     }
+
 
 
     @Override
@@ -277,6 +301,56 @@ public class BookingServiceImpl implements BookingService {
         return customerRepository.save(booking);
     }
 
+    @Override
+    public Customer adminCreateBooking(AdminBookingCreateRequest req) {
+
+        Customer booking = new Customer();
+
+        // Customer Info
+        booking.setCustomer_name(req.getCustomerName());
+        booking.setCustomer_email(req.getCustomerEmail());
+        booking.setCustomer_number(req.getCustomerNumber());
+
+        booking.setAddress_line_1(req.getAddressLine1());
+        booking.setCity(req.getCity());
+        booking.setZip_code(req.getPincode());
+
+        // Service Info
+        booking.setBooking_service_name(req.getBookingServiceName());
+        booking.setBooking_amount(req.getBookingAmount());
+        booking.setGrand_total(req.getBookingAmount()); // No GST for admin create
+
+        // Status & Meta
+        booking.setBookingStatus("pending");
+        booking.setPaymentStatus("Unpaid");
+        booking.setCreated_by("Admin");
+        booking.setCreated_date(LocalDateTime.now().toString());
+
+        booking.setRemarks(req.getRemarks());
+
+        // Convert Date + Time into LocalDateTime
+        if (req.getBookingDate() != null && req.getBookingTime() != null) {
+
+            String formatted = req.getBookingDate() + "T" + convertTo24Hr(req.getBookingTime());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+            booking.setBookingDate(LocalDateTime.parse(formatted, formatter));
+        }
+
+        return bookingRepository.save(booking);
+    }
+
+
+    @Override
+    public Customer updatePaymentMethod(Long bookingId, String paymentMethod) {
+
+        Customer booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        booking.setPaymentMethod(paymentMethod);
+
+        return bookingRepository.save(booking);
+    }
 
 
 }

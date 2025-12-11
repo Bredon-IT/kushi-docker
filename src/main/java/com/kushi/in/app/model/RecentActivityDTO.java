@@ -13,7 +13,11 @@ public class RecentActivityDTO {
     private String booking_service_name;
     private LocalDateTime bookingDate;
 
+    // ⭐ New fields for frontend display
+    private String message;
+    private String formattedTime;
 
+    // Getters & Setters
     public Long getBooking_id() {
         return booking_id;
     }
@@ -52,5 +56,21 @@ public class RecentActivityDTO {
 
     public void setBookingDate(LocalDateTime bookingDate) {
         this.bookingDate = bookingDate;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getFormattedTime() {
+        return formattedTime;
+    }
+
+    public void setFormattedTime(String formattedTime) {
+        this.formattedTime = formattedTime;
     }
 }
