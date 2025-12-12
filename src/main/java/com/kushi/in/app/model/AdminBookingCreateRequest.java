@@ -1,3 +1,4 @@
+
 package com.kushi.in.app.model;
 
 import lombok.Data;
