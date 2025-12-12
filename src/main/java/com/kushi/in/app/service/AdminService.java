@@ -40,5 +40,5 @@ public interface AdminService {
 
   void removeWorker(Long bookingId, String workername);
 
-    List<BookingDTO> getTodaysBookings();
+  List<BookingDTO> getTodaysBookings();
 }

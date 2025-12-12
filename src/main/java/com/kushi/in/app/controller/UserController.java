@@ -31,9 +31,9 @@ public class UserController {
     private final CustomerRepository customerRepository; // ✅ Add this
 
     public UserController(UserService userService,
-            UserRepository userRepository,
-            OrderService orderService,
-            CustomerRepository customerRepository) {
+                          UserRepository userRepository,
+                          OrderService orderService,
+                          CustomerRepository customerRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.orderService = orderService;
@@ -81,6 +81,12 @@ public class UserController {
         return ResponseEntity.ok(saved);
     }
 
+
+
+
+
+
+
     // ⭐️ Rating update endpoint
     @PutMapping("/bookings/{id}/rating")
     public ResponseEntity<String> rateBooking(
@@ -89,6 +95,7 @@ public class UserController {
         orderService.updateRatingAndFeedback(id, request);
         return ResponseEntity.ok("Rating and feedback saved successfully");
     }
+
 
     // ✅ Fetch logged-in user's bookings based on email passed as query param
     // Fetch logged-in user's bookings based on email passed as query param
@@ -111,6 +118,8 @@ public class UserController {
 
         return ResponseEntity.ok(bookings);
     }
+
+
 
     // ✅ Create a new booking for logged-in user
     @PostMapping("/bookings/logged-in/{userId}")
@@ -135,7 +144,7 @@ public class UserController {
         }
 
         // 2. IMPORTANT: Use a DTO (Data Transfer Object) here instead of returning
-        // the full Customer entity to prevent exposing sensitive data.
+        //    the full Customer entity to prevent exposing sensitive data.
         return ResponseEntity.ok(reviews); // Placeholder, use DTO in production
     }
 
