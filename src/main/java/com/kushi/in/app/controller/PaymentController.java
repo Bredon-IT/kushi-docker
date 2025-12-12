@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.kushi.in.app.constants.KushiConstants.KUSHI_GLOBAL;
+
 @RestController
 @RequestMapping("/api/payment")
-@CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"})
+@CrossOrigin(origins = { KUSHI_GLOBAL })
 public class PaymentController {
 
     @Autowired
@@ -28,8 +30,7 @@ public class PaymentController {
         try {
             Map<String, Object> orderData = razorpayService.createOrder(
                     request.getAmount(),
-                    request.getCurrency()
-            );
+                    request.getCurrency());
             return ResponseEntity.ok(orderData);
         } catch (Exception e) {
             e.printStackTrace();
@@ -49,8 +50,7 @@ public class PaymentController {
             boolean isValid = razorpayService.verifyPaymentSignature(
                     request.getRazorpay_order_id(),
                     request.getRazorpay_payment_id(),
-                    request.getRazorpay_signature()
-            );
+                    request.getRazorpay_signature());
 
             Map<String, Object> response = new HashMap<>();
             response.put("verified", isValid);
