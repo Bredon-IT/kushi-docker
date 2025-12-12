@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.kushi.in.app.config.AppConstants.*;
+import static com.kushi.in.app.constants.KushiConstants.KUSHI_GLOBAL;
 
 @RestController
 @RequestMapping("/api/bookings")
-@CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
-
+@CrossOrigin(origins = { KUSHI_GLOBAL }) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
 
  // frontend React dev server
 public class BookingController {

@@ -18,10 +18,12 @@ import java.util.List;
 import java.util.Map;
 
 import static com.kushi.in.app.config.AppConstants.*;
+import static com.kushi.in.app.constants.KushiConstants.KUSHI_GLOBAL;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL}) // Update with actual frontend URL for production
+@CrossOrigin(origins = { KUSHI_GLOBAL }) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL}) // Update with actual frontend
+                                         // URL for production
 public class AdminController {
 
 
@@ -107,8 +109,7 @@ public class AdminController {
 
         try {
             return ResponseEntity.ok(
-                    adminService.getFinancialStatistics(filter, startDate, endDate)
-            );
+                    adminService.getFinancialStatistics(filter, startDate, endDate));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(null);
@@ -247,8 +248,7 @@ public class AdminController {
             writer.println(
                     row.get("booking_Service_name") + "," +
                             row.get("totalRevenue") + "," +
-                            row.get("bookingCount")
-            );
+                            row.get("bookingCount"));
         }
     }
 

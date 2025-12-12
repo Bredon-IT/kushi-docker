@@ -599,7 +599,7 @@ public class AdminServiceImpl implements AdminService {
             List<Customer> serviceBookings = entry.getValue();
 
             double totalRevenue = serviceBookings.stream()
-                    .mapToDouble(Customer::getTotalAmount)
+                    .mapToDouble(c -> c.getTotalAmount() != null ? c.getTotalAmount() : 0.0)
                     .sum();
 
             int bookingCount = serviceBookings.size();
