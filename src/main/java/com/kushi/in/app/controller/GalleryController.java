@@ -12,10 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 import static com.kushi.in.app.config.AppConstants.*;
+import static com.kushi.in.app.constants.KushiConstants.KUSHI_GLOBAL;
 
 @RestController
 @RequestMapping("/api/gallery")
-@CrossOrigin(origins = {"https://dev.dhtawzq4yzgjo.amplifyapp.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
+@CrossOrigin(origins = { KUSHI_GLOBAL }) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
 public class GalleryController {
 
     @Autowired
@@ -23,8 +24,8 @@ public class GalleryController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(
-            @RequestParam(value="file", required=false) MultipartFile file,
-            @RequestParam(value="fileUrl", required=false) String fileUrl,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "fileUrl", required = false) String fileUrl,
             @RequestParam("description") String description) {
         try {
             galleryService.saveFile(file, fileUrl, description);
