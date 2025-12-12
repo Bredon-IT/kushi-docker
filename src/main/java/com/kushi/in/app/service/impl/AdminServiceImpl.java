@@ -166,7 +166,7 @@ public class AdminServiceImpl implements AdminService {
         List<Customer> bookings = adminRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime start;
-        LocalDateTime end = now;
+        LocalDateTime end = now.toLocalDate().atTime(23, 59, 59);
 
         // ===========================
         //      FILTER LOGIC
@@ -267,7 +267,7 @@ public class AdminServiceImpl implements AdminService {
         List<Customer> bookings = adminRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime start;
-        LocalDateTime end = now;
+        LocalDateTime end = now.toLocalDate().atTime(23, 59, 59);
 
         // ===========================
         //       FILTER LOGIC
@@ -410,21 +410,26 @@ public class AdminServiceImpl implements AdminService {
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime start;
-        LocalDateTime endTime = now;
+        LocalDateTime endTime = now.toLocalDate().atTime(23, 59, 59);
+
 
         if (filter != null) {
             switch (filter.toLowerCase()) {
                 case "today":
                     start = now.toLocalDate().atStartOfDay();
+                    endTime = now.toLocalDate().atTime(23, 59, 59);
                     break;
                 case "month":
                     start = now.withDayOfMonth(1).toLocalDate().atStartOfDay();
+                    endTime = now.toLocalDate().atTime(23, 59, 59);
                     break;
                 case "year":
                     start = now.withDayOfYear(1).toLocalDate().atStartOfDay();
+                    endTime = now.toLocalDate().atTime(23, 59, 59);
                     break;
                 default:
                     start = LocalDate.of(2000, 1, 1).atStartOfDay();
+                    endTime = now.toLocalDate().atTime(23, 59, 59);
             }
         }
         else if (startDate != null && endDate != null) {
@@ -599,7 +604,7 @@ public class AdminServiceImpl implements AdminService {
             List<Customer> serviceBookings = entry.getValue();
 
             double totalRevenue = serviceBookings.stream()
-                    .mapToDouble(c -> c.getTotalAmount() != null ? c.getTotalAmount() : 0.0)
+                    .mapToDouble(Customer::getTotalAmount)
                     .sum();
 
             int bookingCount = serviceBookings.size();

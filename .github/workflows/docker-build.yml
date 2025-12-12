@@ -85,7 +85,7 @@ jobs:
 
           SERVICE_ARN=$(aws apprunner list-services \
 
-            --query "ServiceSummaryList[?ServiceName=='kushi-backend-new'].ServiceArn" \
+            --query "ServiceSummaryList[?ServiceName=='kushi-backend-dev'].ServiceArn" \
 
             --output text)
           

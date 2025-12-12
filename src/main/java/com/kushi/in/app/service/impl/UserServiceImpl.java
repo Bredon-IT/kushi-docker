@@ -28,34 +28,37 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AuthResponse signup(SignupRequest request) {
-        // Check if email already exists
+
+        // ✅ Combined validation: email + phone (returns both messages if needed)
+        StringBuilder error = new StringBuilder();
+
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
-        }
-        // 2. Check if phone number already exists
-        if (userRepository.existsByPhone(request.getPhone())) {
-            // Specific message for client to handle
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Phone number already registered"
-            );
+            error.append("Email already exists. ");
         }
 
+        if (userRepository.existsByPhone(request.getPhone())) {
+            error.append("Phone number already registered.");
+        }
+
+        if (error.length() > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, error.toString().trim());
+        }
+
+        // Create new user object
         User user = new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setFullName(request.getFirstName() + " " + request.getLastName());
         user.setEmail(request.getEmail().toLowerCase()); // lowercase for consistency
         user.setPhone(request.getPhone());
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // ✅ Hash password with BCrypt
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // Hash password with BCrypt
 
         User saved = userRepository.save(user);
 
-
-
+        // Update user ID in customer table
         customerRepository.updateUserIdByEmail(saved.getEmail());
 
-        // 🔹 Sync user_id in tbl_booking_info
+        // Sync user_id in tbl_booking_info
         customerRepository.syncUserIdsWithEmails();
 
         return new AuthResponse(
@@ -65,13 +68,12 @@ public class UserServiceImpl implements UserService {
         );
     }
 
-
     @Override
     public AuthResponse signin(SigninRequest request) {
         User user = userRepository.findByEmail(request.getEmail().toLowerCase())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
 
-        // ✅ Use BCrypt to verify password
+        // Validate password using BCrypt
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
@@ -83,13 +85,12 @@ public class UserServiceImpl implements UserService {
         );
     }
 
-
     @Override
     public String forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("No account found with this email"));
 
-        // ✅ Hash new password with BCrypt
+        // Hash new password with BCrypt
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
