@@ -1,3 +1,4 @@
+
 package com.kushi.in.app.model;
 
 import lombok.Data;
@@ -35,6 +36,8 @@ public class BookingDTO {
     private Double grand_total;
     // ✅ ADDED FIELD: Inspection Status (e.g., "completed", "pending", "cancelled", "confirmed")
     private String inspection_status;
+
+    private String statusReason;
 
     private String cancellation_reason;
 
@@ -220,5 +223,13 @@ public class BookingDTO {
 
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 }

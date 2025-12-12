@@ -18,11 +18,14 @@ import java.util.List;
 import java.util.Map;
 
 import static com.kushi.in.app.config.AppConstants.*;
+import static com.kushi.in.app.constants.KushiConstants.KUSHI_GLOBAL;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL}) // Update with actual frontend URL for production
+@CrossOrigin(origins = { KUSHI_GLOBAL }) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL}) // Update with actual frontend
+                                         // URL for production
 public class AdminController {
+
 
     private AdminService adminService;
     private final CustomerService customerService;
@@ -65,18 +68,6 @@ public class AdminController {
         adminService.assignWorker(bookingId, workername);
         return ResponseEntity.ok("Worker assigned successfully");
     }
-    
- // REMOVE worker from booking
-    @PutMapping("/{id}/remove-worker")
-    public ResponseEntity<String> removeWorker(
-            @PathVariable("id") Long bookingId,
-            @RequestBody Map<String, String> body) {
-
-        String workername = body.get("workername");
-        adminService.removeWorker(bookingId, workername);
-
-        return ResponseEntity.ok("Worker removed successfully");
-    }
 
     // REMOVE worker from booking
     @PutMapping("/{id}/remove-worker")
@@ -118,8 +109,7 @@ public class AdminController {
 
         try {
             return ResponseEntity.ok(
-                    adminService.getFinancialStatistics(filter, startDate, endDate)
-            );
+                    adminService.getFinancialStatistics(filter, startDate, endDate));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(null);
@@ -258,8 +248,7 @@ public class AdminController {
             writer.println(
                     row.get("booking_Service_name") + "," +
                             row.get("totalRevenue") + "," +
-                            row.get("bookingCount")
-            );
+                            row.get("bookingCount"));
         }
     }
 
@@ -273,4 +262,3 @@ public class AdminController {
 
 }
 
- 

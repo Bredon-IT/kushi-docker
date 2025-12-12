@@ -13,10 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 import static com.kushi.in.app.config.AppConstants.*;
+import static com.kushi.in.app.constants.KushiConstants.KUSHI_GLOBAL;
 
 @RestController
 @RequestMapping("/api/login")
-@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"}, allowCredentials = "true") // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL}, allowCredentials = "true") // Allow from any frontend
+@CrossOrigin(origins = { KUSHI_GLOBAL }, allowCredentials = "true") // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL},
+                                                                    // allowCredentials = "true") // Allow from any
+                                                                    // frontend
 public class LoginController {
 
     @Autowired
@@ -62,8 +65,8 @@ public class LoginController {
 
     @PutMapping(value = "/update-password/{adminId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updatePassword(@PathVariable Long adminId,
-                                            @RequestParam String oldPassword,
-                                            @RequestParam String newPassword) {
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword) {
         Map<String, String> response = new HashMap<>();
         try {
             loginService.updatePassword(adminId, oldPassword, newPassword);
@@ -80,7 +83,7 @@ public class LoginController {
     public ResponseEntity<?> addUser(@RequestBody Login login, @RequestParam Long adminId) {
         Map<String, Object> response = new HashMap<>();
         try {
-            if(adminId != 1) {
+            if (adminId != 1) {
                 throw new RuntimeException("❌ Only the first admin can add users!");
             }
             Login addedUser = loginService.addUser(login);
@@ -102,7 +105,7 @@ public class LoginController {
     public ResponseEntity<?> deleteUser(@PathVariable Long targetAdminId, @RequestParam Long adminId) {
         Map<String, String> response = new HashMap<>();
         try {
-            if(adminId != 1) {
+            if (adminId != 1) {
                 throw new RuntimeException("❌ Only the first admin can delete users!");
             }
             loginService.deleteUser(targetAdminId);

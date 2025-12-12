@@ -9,37 +9,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.web.multipart.MultipartFile;
+
 @Service
 public interface CustomerService {
-    Services addService(Services services);
+    Services addService(Services services, MultipartFile imageFile);
 
     List<Services> getAllServices();
 
     void deleteService(Long id);
 
-
-    Services updateService(Long id, Services services);
+    Services updateService(Long id, Services services, MultipartFile imageFile);
 
     List<CustomerDTO> getAll();
+
     Customer getById(Long bookingId);
+
     Customer create(Customer customer);
+
     Customer update(Long bookingId, Customer update);
+
     boolean delete(Long bookingId);
 
     List<CustomerDTO> getOrdersByUserId(Long userId);
+
     List<Customer> getCustomersByBookingStatus(String status);
 
     List<CustomerDTO> getLoggedInCustomers();
+
     List<CustomerDTO> getGuestCustomers();
+
     List<CustomerDTO> getCompletedBookings();
-    
+
     List<Customer> getBookingsByEmail(String email);
-
-
 
     // Update status (Enable/Disable)
     String updateServiceStatus(Long serviceId, String status);
-
-
 
 }

@@ -43,7 +43,7 @@ public class BookingRequest {
     @Column(name = "service_id", nullable = true)
     private Long service_id;
     private String cancellation_reason;
-
+    private String statusReason;
     // ✅ ADDED FIELD: Inspection Status (e.g., "completed", "pending", "cancelled", "confirmed")
     private String inspection_status;
 
@@ -352,4 +352,11 @@ public class BookingRequest {
     }
 
 
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
 }

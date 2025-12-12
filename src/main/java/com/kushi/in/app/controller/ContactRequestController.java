@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.kushi.in.app.config.AppConstants.*;
+import static com.kushi.in.app.constants.KushiConstants.KUSHI_GLOBAL;
 
 @RestController
 @RequestMapping("/api/contact")
-@CrossOrigin(origins = {"https://kushiservices.com","https://www.kushiservices.com"}) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
+@CrossOrigin(origins = { KUSHI_GLOBAL }) // {KUSHI_SERVICES_URL, KUSHI_SERVICES_WWW_URL})
 public class ContactRequestController {
 
     @Autowired
@@ -42,14 +43,16 @@ public class ContactRequestController {
     @PutMapping("/mark-read/{id}")
     public ResponseEntity<String> markRead(@PathVariable Long id) {
         boolean ok = service.markAsRead(id);
-        if (ok) return ResponseEntity.ok("Marked read");
+        if (ok)
+            return ResponseEntity.ok("Marked read");
         return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/mark-unread/{id}")
     public ResponseEntity<String> markUnread(@PathVariable Long id) {
         boolean ok = service.markAsUnread(id);
-        if (ok) return ResponseEntity.ok("Marked unread");
+        if (ok)
+            return ResponseEntity.ok("Marked unread");
         return ResponseEntity.notFound().build();
     }
 }
